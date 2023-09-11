@@ -1,0 +1,54 @@
+﻿@model ProvidersDomain.ViewModels.Specification.SpecificationModel
+@{
+    ViewData["Title"] = $"Спецификация от {Model.CreatedAt}";
+}
+
+<h2 class="mb-5">Спецификация от @Model.CreatedAt</h2>
+
+<div class="mb-3">
+    <label class="fw-bold">Действие спецификации</label><br>
+    <p class="ms-3">
+        @($"{Model.StartsAt:dd.MM.yyyy} - {Model.ExpiresAt:dd.MM.yyyy} ({(Model.ExpiresAt - Model.StartsAt)?.TotalDays}д.)")
+    </p>
+</div>
+<div class="mb-3">
+    <label class="fw-bold" asp-for="@Model.CreatedAt"></label><br>
+    <p class="ms-3">@Model.CreatedAt</p>
+</div>
+<div class="mb-3">
+    <label class="fw-bold" asp-for="@Model.LastModified"></label><br />
+    <p class="ms-3">@Model.LastModified</p>
+</div>
+<table cellpadding="10" class="mb-3">
+    <thead class="text-center">
+        <tr>
+            <th>
+                @Html.DisplayNameFor(model => model.Products.First().Name)
+            </th>
+            <th>
+                @Html.DisplayNameFor(model => model.Products.First().Price)
+            </th>
+        </tr>
+    </thead>
+    <tbody>
+
+        @for (var i = 0; i < Model.Products.Count; i++)
+        {
+            <tr>
+                <td class="text-start">
+                    <a asp-controller="Catalog" asp-action="EditProduct" asp-route-id="@Model.Products[i].Id">@Model.Products[i].Name</a>
+                </td>
+                <td class="text-end">
+                    @(Model.Products[i].Price?.ToString("#,##0.00") ?? "0.00")
+                </td>
+            </tr>
+        }
+    </tbody>
+</table>
+<form id="copySpecification" asp-action="CopySpecification" asp-controller="Specification" asp-anti-forgery="true">
+    <input type="hidden" name="specificationId" value="@Model.Id">
+</form>
+<div>
+    <input type="submit" form="copySpecification" value="Создать спецификацию на основании этой" class="btn btn-outline-dark" />
+    <button id="cancel" class="btn btn-outline-secondary" onclick="history.back();">Назад</button>
+</div>

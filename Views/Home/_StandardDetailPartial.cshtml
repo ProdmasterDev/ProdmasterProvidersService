@@ -1,0 +1,36 @@
+﻿@model ProvidersDomain.Models.Standart
+<div class="modal-header">
+    <h5 class="modal-title" id="serviceLabel">@Model.Name</h5>
+    <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+</div>
+<div class="modal-body">
+    <strong>
+        @Html.DisplayNameFor(model => model.Taste)
+    </strong>
+    <p>@(Model.Taste ?? "Не указан")</p>
+    @*<strong>
+        @Html.DisplayNameFor(model => model.Smell)
+    </strong>
+    <p>
+        @(Model.Smell ?? "Не указан")
+    </p>*@
+    <strong>
+        @Html.DisplayNameFor(model => model.Color)
+    </strong>
+    <p>
+        @(Model.Color ?? "Не указан")
+    </p>
+    <strong>
+        @Html.DisplayNameFor(model => model.Structure)
+    </strong>
+    <p>
+        @(Model.Structure ?? "Не указана")
+    </p>
+    <strong>
+        @Html.DisplayNameFor(model => model.Consistenc)
+    </strong>
+    <p>
+        @(Model.Consistenc ?? "Не указана")
+    </p>
+    <a class="btn btn-outline-success" asp-action="editProduct" asp-controller="Catalog" asp-route-standart="@Model.Id">Предложить</a>
+</div>

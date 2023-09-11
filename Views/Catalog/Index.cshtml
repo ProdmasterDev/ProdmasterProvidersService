@@ -1,0 +1,37 @@
+﻿@model ProvidersDomain.ViewModels.Catalog.CatalogModel
+@{
+    ViewData["Title"] = "Каталог товаров";
+}
+
+<h2 class="mb-5 display-4">Каталог товаров</h2>
+
+<div class="btn-toolbar mb-3" role="toolbar">
+    <div class="btn-group" role="group">
+        <button id="deleteProduct" type="button" class="btn btn-danger" disabled>
+            <span class="spinner-border spinner-border-sm d-none" role="status" aria-hidden="true"></span>
+            Удалить
+        </button>
+        <a asp-controller="Catalog" asp-action="EditProduct" class="btn btn-outline-dark">Добавить</a>
+    </div>
+</div>
+<div class="row g-3" style="overflow-x:auto;">
+    <table cellpadding="3" cellspacing="0" class="position-relative">
+        <thead>
+            <tr>
+                <th></th>
+                <th>№</th>
+                <th>Артикул</th>
+                <th>Эталон</th>
+                <th>Название товара</th>
+                <th>Ед. изм.</th>
+                <th>Квант</th>
+                <th>Последняя цена</th>
+                <th>Производитель</th>
+                <th>Статус</th>
+            </tr>
+        </thead>
+        <tbody>
+            @await Html.PartialAsync("_ProductsTable", Model)
+        </tbody>
+    </table>
+</div>

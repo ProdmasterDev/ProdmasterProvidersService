@@ -1,0 +1,100 @@
+﻿@model ProvidersDomain.ViewModels.Catalog.ProductModel
+@{
+    ViewData["Title"] = Model.Id == default ? "Новый товар" : $"Редактирование {Model.Name}";
+}
+@{
+    var standartSelectList = new SelectList(ViewBag.Stands, nameof(ProvidersDomain.Models.Standart.Id), nameof(ProvidersDomain.Models.Standart.Name), Model.Standart, nameof(ProvidersDomain.Models.Standart.CategoryName));
+    var countriesSelectList = new SelectList(ViewBag.Countries, nameof(ProvidersDomain.Models.Country.Id), nameof(ProvidersDomain.Models.Country.Name));
+    var manufacturersSelectList = new SelectList(ViewBag.Manufacturers, nameof(ProvidersDomain.Models.Manufacturer.Id), nameof(ProvidersDomain.Models.Manufacturer.Name));
+    var alertClass = Model.VerifyState switch
+    {
+        ProvidersDomain.Models.VerifyState.NotVerified => "alert-danger",
+        _ => "d-none",
+    };
+    var alertMessage = Model.VerifyState switch
+    {
+        ProvidersDomain.Models.VerifyState.NotVerified => Model.VerifyNote ?? "Товар не был утвержден!",
+        _ => string.Empty,
+    };
+}
+
+<h2 class="mb-5">@Model.Name</h2>
+<div class="alert @alertClass" role="alert">
+    @alertMessage
+</div>
+<form id="editProduct" asp-action="EditProduct" asp-controller="Catalog" asp-anti-forgery="true">
+    <input type="hidden" asp-for="@Model.Id" />
+    <div class="mb-3 validation" asp-validation-summary="ModelOnly"></div>
+    <div class="mb-3">
+        <label asp-for="@Model.StandartId"></label><br>
+        <select class="form-select standart-select" asp-for="@Model.StandartId" asp-items="@standartSelectList"></select>
+        @*<button class="btn btn-outline-dark dropdown-toggle w-100 text-start" type="button" id="dropdownMenuButton" data-bs-toggle="dropdown" aria-expanded="false">
+        <span class="me-auto">Выберите номенклатор товара</span>
+        </button>
+        <div class="dropdown-menu" aria-labelledby="dropdownMenuButton">
+        <ul>
+        <li><a class="dropdown-item" href="#">Menu item</a></li>
+        <li><a class="dropdown-item" href="#">Menu item</a></li>
+        <li><a class="dropdown-item" href="#">Menu item</a></li>
+        </ul>
+        </div>
+        <input type="hidden" class="form-select standart-select" asp-for="@Model.StandartId" />*@
+        
+    </div>
+    <div class="mb-3">
+        <label asp-for="@Model.Quantity"></label><br>
+        <input type=number step=any class="form-control" asp-for="@Model.Quantity">
+        <span class="text-danger" asp-validation-for="@Model.Quantity"></span>
+    </div>
+    <div class="mb-3">
+        <label asp-for="@Model.Name"></label><br />
+        <input class="form-control" type="text" asp-for="@Model.Name" />
+        <span class="text-danger" asp-validation-for="@Model.Name"></span>
+    </div>
+    <div class="mb-3">
+        <label asp-for="@Model.VendorCode"></label><br />
+        <input class="form-control" type="text" asp-for="@Model.VendorCode" />
+        <span class="text-danger" asp-validation-for="@Model.VendorCode"></span>
+    </div>
+    @if (!string.IsNullOrEmpty(Model.ManufacturerName))
+    {
+        <div class="mb-3">
+            <label asp-for="@Model.ManufacturerName"></label><br />
+            <input class="form-control" type="text" asp-for="@Model.ManufacturerName" />
+            <span class="text-danger" asp-validation-for="@Model.ManufacturerName"></span>
+        </div>
+    }
+    else
+    {
+        <div class="mb-3">
+            <label asp-for="@Model.ManufacturerId"></label><br>
+            <select class="form-select manufacturer-select" asp-for="@Model.ManufacturerId" asp-items="@manufacturersSelectList"></select>
+        </div>
+    }
+    <div class="mb-3">
+        <label asp-for="@Model.Brand"></label><br />
+        <input class="form-control" type="text" asp-for="@Model.Brand" />
+        <span class="text-danger" asp-validation-for="@Model.Brand"></span>
+    </div>
+    <div class="mb-3">
+        <label asp-for="@Model.CountryId"></label><br>
+        <select class="form-select country-select" asp-for="@Model.CountryId" asp-items="@countriesSelectList"></select>
+    </div>
+    <div class="mb-3">
+        <label asp-for="@Model.Note"></label><br />
+        <input class="form-control" type="text" asp-for="@Model.Note" />
+        <span class="text-danger" asp-validation-for="@Model.Note"></span>
+    </div>
+</form>
+<div>
+    <input type="submit" value="Сохранить" class="btn btn-outline-dark" form="editProduct" />
+    @if(Model.Id != default)
+    {
+        <a class="btn btn-outline-success" asp-action="editSpecification" asp-controller="Specification" asp-route-id="@Model.SpecificationId" asp-route-productToAdd="@Model.Id">Добавить в спецификацию</a>        
+    }
+    <button id="cancel" class="btn btn-outline-secondary" onclick="history.back();">Назад</button>
+</div>
+<script>
+    var units = @Html.Raw(ViewBag.Units);
+    var standartUnits = @Html.Raw(ViewBag.StandartUnits);
+</script>

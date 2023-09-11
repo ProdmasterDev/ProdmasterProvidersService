@@ -1,0 +1,57 @@
+﻿@model ProvidersDomain.ViewModels.Specification.SpecificationIndexModel
+@for (int i = 0; i < Model.Specifications.Count; i++)
+{
+    var verifyClass = "";
+    var verifyState = "";
+    var specificationHref = $"/specification?id={Model.Specifications[i].Id}";
+    switch (Model.Specifications[i].VerifyState)
+    {
+        case ProvidersDomain.Models.VerifyState.Draft:
+            verifyClass = "bg-warning";
+            verifyState = "Черновик";
+            specificationHref = $"/specification/editSpecification?id={Model.Specifications[i].Id}";
+            break;
+        case ProvidersDomain.Models.VerifyState.NotSended:
+            verifyClass = "bg-light";
+            verifyState = "Новая";
+            specificationHref = $"/specification/editSpecification?id={Model.Specifications[i].Id}";
+            break;
+        case ProvidersDomain.Models.VerifyState.Sended:
+            verifyClass = "bg-info";
+            verifyState = "На проверке";
+            break;
+        case ProvidersDomain.Models.VerifyState.NotVerified:
+            specificationHref = $"/specification/editSpecification?id={Model.Specifications[i].Id}";
+            verifyClass = "bg-danger";
+            verifyState = "Не утверждена";
+            break;
+        case ProvidersDomain.Models.VerifyState.Verified:
+            verifyClass = "bg-success";
+            verifyState = "Утверждена";
+            break;
+        case ProvidersDomain.Models.VerifyState.Corrected:
+            specificationHref = $"/specification/editSpecification?id={Model.Specifications[i].Id}";
+            verifyClass = "bg-warning";
+            verifyState = "Исправлена, ждет проверки";
+            break;
+    }
+    <tr class="clickable-row bg-gradient bg-opacity-25 @verifyClass" data-href="@specificationHref">
+        <td>
+            @if (Model.Specifications[i].VerifyState == ProvidersDomain.Models.VerifyState.NotSended
+           || Model.Specifications[i].VerifyState == ProvidersDomain.Models.VerifyState.NotVerified
+           || Model.Specifications[i].VerifyState == ProvidersDomain.Models.VerifyState.Corrected
+           || Model.Specifications[i].VerifyState == ProvidersDomain.Models.VerifyState.Draft)
+            {
+                <input class="check-delete-spec" type="checkbox" data-id="@Model.Specifications[i].Id" />
+            }
+        </td>
+        <td>@(i + 1)</td>
+        <td>@Model.Specifications[i].CreatedAt</td>
+        <td>@Model.Specifications[i].LastModified</td>
+        <td>
+            @Model.Specifications[i].StartsAt.ToString("dd.MM.yyyy") - @Model.Specifications[i].ExpiresAt.ToString("dd.MM.yyyy") (@((Model.Specifications[i].ExpiresAt - Model.Specifications[i].StartsAt).TotalDays)д.)
+        </td>
+        <td>@Model.Specifications[i].Products.Count</td>
+        <td>@verifyState</td>
+    </tr>
+}

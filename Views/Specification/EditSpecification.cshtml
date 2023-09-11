@@ -1,0 +1,113 @@
+﻿@using ProvidersDomain.ViewModels.Specification;
+
+@model SpecificationModel
+@{
+    ViewData["Title"] = Model.Id == default ? "Новая спецификация" : $"Редактирование спецификации от {Model.LastModified}";
+}
+@{
+    var productsSelectList = new SelectList(ViewBag.Products, nameof(ProvidersDomain.Models.Product.Id), nameof(ProvidersDomain.Models.Product.Name));
+    var alertClass = Model.VerifyState switch
+    {
+        ProvidersDomain.Models.VerifyState.NotVerified => "alert-danger",
+        _ => "d-none",
+    };
+    var alertMessage = Model.VerifyState switch
+    {
+        ProvidersDomain.Models.VerifyState.NotVerified => Model.VerifyNote ?? "Спецификация не была утверждена!",
+        _ => string.Empty,
+    };
+}
+
+<h2 class="mb-5">Спецификация от @Model.LastModified</h2>
+<div class="alert @alertClass" role="alert">
+    @alertMessage
+</div>
+<form id="editSpecification" asp-action="EditSpecification" asp-controller="Specification" asp-anti-forgery="true">
+    <input type="hidden" asp-for="@Model.Id" />
+    <input type="hidden" asp-for="@Model.CreatedAt" />
+    <input type="hidden" asp-for="@Model.LastModified" />
+    <div class="mb-3 validation" asp-validation-summary="ModelOnly"></div>
+    <div class="mb-3">
+        <label asp-for="@Model.StartsAt">С</label><br />
+        <input type="date" min="@DateTime.Now.ToString("yyyy-MM-dd")" max="@DateTime.Now.AddYears(1).ToString("yyyy-MM-dd")" class="form-control" asp-for="@Model.StartsAt" />
+        <span class="text-danger" asp-validation-for="@Model.StartsAt"></span>
+    </div>
+    <div class="mb-3">
+        <label asp-for="@Model.ExpiresAt">До</label><br />
+        <input type="date" min="@Model.StartsAt?.AddDays(7).ToString("yyyy-MM-dd")" max="@DateTime.Now.AddYears(1).ToString("yyyy-MM-dd")" class="form-control" asp-for="@Model.ExpiresAt" />
+        <span class="text-danger" asp-validation-for="@Model.ExpiresAt"></span>
+    </div>
+
+    <span class="text-danger" asp-validation-for="@Model.Products"></span>
+    <table id="productTable" cellpadding="3" cellspacing="0" class="mb-3">
+        <thead>
+            <tr>
+                <td>
+                    Товар
+                </td>
+                <td>
+                    Цена
+                </td>
+                <td></td>
+            </tr>
+        </thead>
+        <tbody>
+            @if (Model.Products[0].Id != default)
+            {
+                @for (int i = 0; i < Model.Products.Count; i++)
+                {
+                    <tr data-index="@i">
+                        <td>
+                            <div>@ViewBag.ProductNames[Model.Products[i].Id]</div>
+                            <input type="hidden" class="specification-product-id" asp-for="@Model.Products[i].Id">
+                        </td>
+                        <td>
+                            <input type=number step=any class="form-control" asp-for="@Model.Products[i].Price">
+                            <span class="text-danger" asp-validation-for="@Model.Products[i].Price"></span>
+                        </td>
+                        <td>
+                            <button class="btn-close delete-product"></button>
+                        </td>
+                    </tr>
+                }
+            }
+            else
+            {
+                <tr data-index="0">
+                    <td>
+                        <select class="form-select standart-select specification-product-id" asp-for="@Model.Products[0].Id" asp-items="@productsSelectList"></select>
+                    </td>
+                    <td>
+                        <input type=number step=any class="form-control" asp-for="@Model.Products[0].Price">
+                        <span class="text-danger" asp-validation-for="@Model.Products[0].Price"></span>
+                    </td>
+                    <td>
+                        <button class="btn-close delete-product"></button>
+                    </td>
+                </tr>
+            }
+        </tbody>
+    </table>
+    <div class="mb-3">
+        <button id="addProduct" class="btn btn-outline-info">Добавить</button>
+    </div>
+</form>
+<form id="copySpecification" asp-action="CopySpecification" asp-controller="Specification" asp-anti-forgery="true">
+    <input type="hidden" name="specificationId" value="@Model.Id">
+</form>
+<div>
+    <input name="SaveOption" type="submit" form="editSpecification" value="Отправить" class="btn btn-outline-dark" />
+    @if (Model.Id == default || Model.VerifyState == ProvidersDomain.Models.VerifyState.Draft)
+    {
+        <input name="SaveOption" type="submit" form="editSpecification" value="Сохранить" class="btn btn-outline-dark" />
+    }
+    @if (Model.Id != default)
+    {
+        <input type="submit" form="copySpecification" value="Создать спецификацию на основании этой" class="btn btn-outline-dark" />
+    }
+    <button id="cancel" class="btn btn-outline-secondary" onclick="history.back();">Назад</button>
+</div>
+
+<script>
+    var products = @Html.Raw(Newtonsoft.Json.JsonConvert.SerializeObject(ViewBag.ProductNames));
+</script>

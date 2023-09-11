@@ -1,0 +1,55 @@
+﻿@model ProvidersDomain.ViewModels.Catalog.ProductModel
+@{
+    ViewData["Title"] = Model.Name;
+}
+
+<h2 class="mb-5">@Model.Name</h2>
+
+<div class="mb-3">
+    <label class="fw-bold" asp-for="@Model.StandartId"></label><br>
+    <p class="ms-3">@(Model.Standart?.Name ?? "Не указан")</p>
+</div>
+<div class="mb-3">
+    <label class="fw-bold" asp-for="@Model.Quantity"></label><br>
+    <p class="ms-3">@Model.Quantity</p>
+</div>
+<div class="mb-3">
+    <label class="fw-bold" asp-for="@Model.Name"></label><br />
+    <p class="ms-3">@Model.Name</p>
+</div>
+<div class="mb-3">
+    <label class="fw-bold" asp-for="@Model.VendorCode"></label><br />
+    <p class="ms-3">@Model.VendorCode</p>
+</div>
+@if (!string.IsNullOrEmpty(Model.ManufacturerName))
+{
+    <div class="mb-3">
+        <label class="fw-bold" asp-for="@Model.ManufacturerName"></label><br />
+        <p class="ms-3">@Model.ManufacturerName</p>
+    </div>
+}
+else
+{
+    <div class="mb-3">
+        <label class="fw-bold" asp-for="@Model.ManufacturerId"></label><br>
+        <p class="ms-3">@(Model.Manufacturer?.Name ?? "Не указан")</p>
+    </div>
+}
+<div class="mb-3">
+    <label class="fw-bold" asp-for="@Model.Brand"></label><br />
+    <p class="ms-3">@(Model.Brand ?? "Не указан")</p>
+</div>
+<div class="mb-3">
+    <label class="fw-bold" asp-for="@Model.CountryId"></label><br>
+    <p class="ms-3">@(Model.Country?.Name ?? "Не указан")</p>
+</div>
+<div class="mb-3">
+    <label class="fw-bold" asp-for="@Model.Note"></label><br />
+    <p class="ms-3">@(Model.Note ?? "Не указано")</p>
+</div>
+<div class="mb-3">
+    <label class="fw-bold" asp-for="@Model.LastPrice"></label><br />
+    <p class="ms-3">@(Model.LastPrice ?? "Не указано")</p>
+</div>
+<a class="btn btn-outline-success" asp-action="editSpecification" asp-controller="Specification" asp-route-id="@Model.SpecificationId" asp-route-productToAdd="@Model.Id">Добавить в спецификацию</a>
+<button id="cancel" class="btn btn-outline-secondary" onclick="history.back();">Назад</button>

@@ -1,0 +1,22 @@
+﻿@model ProvidersDomain.ViewModels.Account.UserModel
+@{
+    ViewData["Title"] = "Профиль";
+}
+
+<h1 class="mb-5 display-4">Профиль</h1>
+
+<div class="mb-3 fs-2">
+    <p>
+        Наименование: @Model.Name
+    </p>
+    <p>
+        ИНН: @Model.INN
+    </p>
+    <p>
+        Email: @Model.Email
+    </p>
+    <p>
+        Номер телефона: @Model.Phone
+    </p>
+</div>
+<a class="btn btn-outline-dark" asp-controller="Account" asp-action="ChangePassword">Сменить пароль</a>

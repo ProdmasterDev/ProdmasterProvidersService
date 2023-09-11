@@ -1,0 +1,39 @@
+﻿@model ProvidersDomain.ViewModels.Home.StandartListModel
+@{
+    ViewData["Title"] = "Номенклатура товаров Продмастер";
+}
+
+<h1 class="display-4 mb-5">Номенклатура товаров Продмастер</h1>
+<div class="mb-3">
+    <form id="standartSearch" class="input-group mb-3">
+        <input type="text" id="standartSearch" class="form-control" />
+        <button type="submit" id="standartSearchBtn" class="btn btn-outline-secondary">
+            Поиск
+            <span id="searchSpinner" class="d-none spinner-border spinner-border-sm" role="status" aria-hidden="true"></span>
+        </button>
+    </form>
+    @if (Model.Standarts.Any())
+    {
+        <div class="accordion" id="accordionStandarts">
+            @await Html.PartialAsync("_StandardAccordionPartial", Model)
+        </div>
+        <div class="modal fade" id="standardModal" tabindex="-1" aria-hidden="true">
+            <div class="modal-dialog modal-lg modal-dialog-centered">
+                <div class="modal-content bg-light">
+                    <div class="modal-header"></div>
+                    <div class="modal-body"></div>
+                    <div class="modal-footer">
+                        <button type="button" class="btn btn-secondary rounded-pill" data-bs-dismiss="modal">Закрыть</button>
+                    </div>
+                </div>
+            </div>
+        </div>
+    }
+    else
+    {
+        <div class="alert alert-info" role="alert">
+            Здесь ничего нет
+        </div>
+    }
+</div>
+

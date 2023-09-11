@@ -1,0 +1,48 @@
+﻿@model ProvidersDomain.ViewModels.Home.StandartListModel
+@if (!Model.Standarts.Any())
+{
+    <div class="alert alert-info" role="alert">
+        По вашему запросу ничего не найдено
+    </div>
+    return;
+}
+@foreach (var group in Model.Standarts)
+{
+    <div class="accordion-item">
+
+        @{
+            var categoryName = "group-" + group.Key.GetHashCode().ToString().Replace("-", "");
+        }
+
+        <h2 class="accordion-header" id="@($"{categoryName}-btn")">
+            <button class="accordion-button collapsed" type="button" data-bs-toggle="collapse" data-bs-target="#@categoryName" aria-expanded="true" aria-controls="collapseOne">
+                @group.Key
+            </button>
+        </h2>
+        <div id="@categoryName" class="accordion-collapse collapse @(Model.CollapseCategories ? "" : "show")" aria-labelledby="@($"{categoryName}-btn")" @(Model.CollapseCategories ? "data-bs-parent=#accordionStandarts" : "")>
+            <div class="accordion-body">
+                <table class="table" cellpadding="10">
+                    <thead>
+                        <tr>
+                            <th>@Html.DisplayNameFor(model => model.Standarts.First().First().Name)</th>
+                            <th>@Html.DisplayNameFor(model => model.Standarts.First().First().UnitName)</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        @foreach (var item in group)
+                        {
+                            <tr>
+                                <td>
+                                    <a href="#" class="link-info standard-detail" data-bs-toggle="modal" data-bs-target="#standardModal" sid="@item.Id">
+                                        @item.Name
+                                    </a>
+                                </td>
+                                <td>@item.UnitName</td>
+                            </tr>
+                        }
+                    </tbody>
+                </table>
+            </div>
+        </div>
+    </div>
+}

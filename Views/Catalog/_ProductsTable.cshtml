@@ -1,0 +1,60 @@
+﻿@model ProvidersDomain.ViewModels.Catalog.CatalogModel
+@for (int i = 0; i < Model.Products.Count; i++)
+{
+    var product = Model.Products[i];
+    var verifyClass = "";
+    var verifyState = "";
+    var productHref = $"/catalog?id={product.Id}";
+    switch (product.VerifyState)
+    {
+        case ProvidersDomain.Models.VerifyState.NotSended:
+            productHref = $"/catalog/editProduct?id={product.Id}";
+            verifyClass = "bg-light";
+            verifyState = "Новый";
+            break;
+        case ProvidersDomain.Models.VerifyState.Sended:
+            verifyClass = "bg-info";
+            verifyState = "На проверке";
+            break;
+        case ProvidersDomain.Models.VerifyState.NotVerified:            
+            productHref = $"/catalog/editProduct?id={product.Id}";
+            verifyClass = "bg-danger";
+            verifyState = "Не утвержден";
+            break;
+        case ProvidersDomain.Models.VerifyState.Verified:            
+            verifyClass = "bg-success";
+            verifyState = "Утвержден";
+            break;
+        case ProvidersDomain.Models.VerifyState.Corrected:
+            productHref = $"/catalog/editProduct?id={product.Id}";
+            verifyClass = "bg-warning";
+            verifyState = "Исправлен, ждет проверки";
+            break;
+    }
+    var price = "-";
+    var lastSpecification = product.Specifications.OrderByDescending(c => c.StartsAt).FirstOrDefault();
+    if (lastSpecification != default)
+    {
+        price = product.ProductSpecifications.FirstOrDefault(c => c.SpecificationId == lastSpecification.Id)?.Price.ToString("#,##0.00") ?? "-";
+    }
+
+    <tr class="clickable-row bg-gradient bg-opacity-25 @verifyClass" data-href="@productHref">
+        <td class="text-center">
+            @if (product.VerifyState == ProvidersDomain.Models.VerifyState.NotSended 
+            || product.VerifyState == ProvidersDomain.Models.VerifyState.NotVerified
+            || product.VerifyState == ProvidersDomain.Models.VerifyState.Corrected)
+            {
+                <input class="check-delete" type="checkbox" data-id="@product.Id" />
+            }
+        </td>
+        <td>@(i + 1)</td>
+        <td>@product.VendorCode</td>
+        <td>@product.Standart.Name</td>
+        <td>@product.Name</td>
+        <td>@(product.Standart.Unit?.Short ?? "-")</td>
+        <td>@product.Quantity</td>
+        <td>@price</td>
+        <td>@(product.Manufacturer?.Name ?? product.ManufacturerName)</td>
+        <td>@verifyState</td>
+    </tr>
+}
