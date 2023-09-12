@@ -137,6 +137,7 @@ namespace ProdmasterProvidersService.Services
                 "from jr as jr " +
                 "left join irfree as rf on rf.journal == jr.number " +
                 $"where jr.object == {customId} and not jr.arch and (LOWER(ALLTRIM(jr.doc_number)) == 'спецификация' or LOWER(ALLTRIM(jr.doc_number)) == 'мониторинг') and rf.standart <> 0 " +
+                "and not(isnull(jr.saled)) and not(empty(jr.saled)) and not(isnull(jr.end)) and not(empty(jr.end)) " +
                 "group by jr.number, jr.saled, jr.end, jr.create, jr.modify\"";
                 //$"where jr.object == {customId} and not jr.arch and (LOWER(ALLTRIM(jr.doc_number)) == 'спецификация' or LOWER(ALLTRIM(jr.doc_number)) == 'мониторинг') and rf.standart <> 0\"";
             var specifications = await GetObjectsFromQueryAsync<IEnumerable<Specification>>(query);
