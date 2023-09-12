@@ -74,11 +74,8 @@ builder.Services.AddSwaggerGen(c =>
             Version = "v1"
         }
      );
-    //var xmlFile = $"{Assembly.GetExecutingAssembly().GetName().Name}.xml";
-    //var filePath = Path.Combine(System.AppContext.BaseDirectory, xmlFile);
     var xmlFiles = Directory.GetFiles(AppContext.BaseDirectory, "*.xml", SearchOption.TopDirectoryOnly).ToList();
     xmlFiles.ForEach(xmlFile => c.IncludeXmlComments(xmlFile));
-    //c.IncludeXmlComments(filePath);
 });
 
 void ConfigureUserContextConnection(DbContextOptionsBuilder options)

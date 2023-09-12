@@ -90,7 +90,6 @@ namespace ProdmasterProvidersService.Services
                     if (dbProduct == null)
                         await _productRepository.Add(product);
                 }
-                //return _productRepository.AddOrUpdateRange(products);
             }
         }
         private async Task<User> AddProvider(User user, string? password)
@@ -139,7 +138,6 @@ namespace ProdmasterProvidersService.Services
                 $"where jr.object == {customId} and not jr.arch and (LOWER(ALLTRIM(jr.doc_number)) == 'спецификация' or LOWER(ALLTRIM(jr.doc_number)) == 'мониторинг') and rf.standart <> 0 " +
                 "and not(isnull(jr.saled)) and not(empty(jr.saled)) and not(isnull(jr.end)) and not(empty(jr.end)) " +
                 "group by jr.number, jr.saled, jr.end, jr.create, jr.modify\"";
-                //$"where jr.object == {customId} and not jr.arch and (LOWER(ALLTRIM(jr.doc_number)) == 'спецификация' or LOWER(ALLTRIM(jr.doc_number)) == 'мониторинг') and rf.standart <> 0\"";
             var specifications = await GetObjectsFromQueryAsync<IEnumerable<Specification>>(query);
 
             if (specifications == null) return null;
@@ -171,7 +169,6 @@ namespace ProdmasterProvidersService.Services
                                     SpecificationId = specification.Id,
                                     Price = productSpecification.Price,
                                 };
-                                //specification.ProductSpecifications.Add(prodspec);
                                 specifications.Where(c => c.DisanId == productSpecificationsGroup.Key).ToList()
                                     .ForEach(c => c.ProductSpecifications.Add(prodspec));
 
@@ -179,11 +176,6 @@ namespace ProdmasterProvidersService.Services
                         }
                     }
                 }
-                //foreach (var specification in specifications)
-                //{
-                //    specification.ProductSpecifications.DistinctBy(c => c.ProductId);
-                //}
-                //specifications.ToList().ForEach(c => c.ProductSpecifications = c.ProductSpecifications.DistinctBy(c => c.ProductId).ToList());
             }
             specifications.ToList().ForEach(c => c.VerifyState = VerifyState.Verified);
             return specifications;
@@ -203,13 +195,6 @@ namespace ProdmasterProvidersService.Services
         }
         private async Task UpdateSpecifications(IEnumerable<Specification> specifications)
         {
-            //foreach (var specification in specifications)
-            //{
-            //    if (specification != null)
-            //    {
-            //        await _specificationRepository.Update(specification);                    
-            //    }
-            //}
             await _specificationRepository.AddOrUpdateRange(specifications);
         }
     }

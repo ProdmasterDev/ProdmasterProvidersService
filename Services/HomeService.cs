@@ -40,7 +40,6 @@ namespace ProdmasterProvidersService.Services
 
         public async Task<StandartListModel> GetStandartListModel(string searchString)
         {
-            //var standarts = (await _standartRepository.Where(c => c.Name.ToLower().Contains(searchString.ToLower()))).ToList();
             var words = searchString.ToLower().Split(' ', StringSplitOptions.RemoveEmptyEntries);
             var allStandarts = await _standartRepository.Select();
             var standarts = new List<Standart>();
