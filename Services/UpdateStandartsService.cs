@@ -138,11 +138,12 @@ namespace ProdmasterProvidersService.Services
 
         private Task<IEnumerable<Standart>?> GetStandarts()
         {
-            var query = "\"select stands.number, stands.stock, stands.taste, stands.smell, stands.color, stands.structure, stands.consistenc, iif(empty(stands.nameprod), stock.name, stands.nameprod) as nameprod, stands.create, stands.modify, stock.unit as unitId, unit.short as unitShort, unit.name as unitName, sa.cvalue as categoryname " +
+            var query = "\"select stands.number, stands.stock, stands.taste, stands.smell, stands.color, stands.structure, stands.consistenc, iif(not(isnull(saname.cvalue) or empty(saname.cvalue)), saname.cvalue, iif(not(empty(stands.nameprod)),stands.nameprod,stock.name)) as nameprod, stands.create, stands.modify, stock.unit as unitId, unit.short as unitShort, unit.name as unitName, sagroup.cvalue as categoryname " +
                 "from standart.dbf as stands " +
                 "left join stock.dbf as stock on stock.number == stands.stock " +
                 "left join unitn.dbf as unit on unit.number == stock.unit " +
-                "left join stockattribute.dbf as sa on stock.number == sa.r1 and sa.name == 'ГРУППА ЗАКУПКИ' " +
+                "left join stockattribute.dbf as sagroup on stock.number == sagroup.r1 and sagroup.name == 'ГРУППА ПОРТАЛ' " +
+                "left join stockattribute.dbf as saname on stock.number == saname.r1 and saname.name == 'НАИМЕНОВАНИЕ ПОРТАЛ' " +
                 "where stands.custom == 751601 and not stands.arch\"";
             return GetObjectsFromQueryAsync<IEnumerable<Standart>>(query);
         }
