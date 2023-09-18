@@ -24,6 +24,46 @@ namespace ProdmasterProvidersService.Services
             _productRepository = productRepository;
             _specificationRepository = specificationRepository;
         }
+
+        public async Task LoadProviders()
+        {
+            var providers = await GetLastNMonthProviders(2);
+
+            if (providers != null)
+            {
+                foreach (var provider in providers)
+                {
+                    try
+                    {
+                        await LoadProvider(provider);
+                    }
+                    catch(Exception ex)
+                    {
+                        Console.WriteLine(ex.Message);
+                    }
+                }
+            }
+        }
+
+        public async Task LoadProvider(User provider)
+        {
+            var user = await _userRepository.First(x => x.DisanId == provider.DisanId)
+                ?? await _userRepository.First(x => x.INN == provider.INN)
+                ?? await AddProvider(provider, GeneratePassword());
+
+            var products = await GetProductsForProvider(user.DisanId);
+            if (products != null)
+            {
+                products.ForEach(c => c.UserId = user.Id);
+                await AddProducts(products);
+            }
+
+            var specifications = await GetSpecificationsForProvider(user.DisanId, user.Id);
+            if (specifications != null)
+            {
+                await UpdateSpecifications(specifications);
+            }
+        }
         public async Task LoadProvider(long customId, string? password)
         {
             var provider = await GetProvider(customId);
@@ -109,6 +149,22 @@ namespace ProdmasterProvidersService.Services
             }
             return await _userRepository.Add(user);
         }
+
+        private async Task<IEnumerable<User>?> GetLastNMonthProviders(long monthsNumber)
+        {
+            var query = "\"select alltrim(cusp.name) + alltrim(cus.c_pref) + alltrim(cus.name) + alltrim(cus.c_suff) as name, " +
+                "IIF(LEN(ALLTRIM(inn)) == 12, ALLTRIM(inn), IIF(EMPTY(inn), SPACE(12), STREXTRACT(cus.inn, '',';'))) as inn, " +
+                "ALLTRIM(cf.tel) as phone, " +
+                "ALLTRIM(STREXTRACT(cf.email + ';', '', ';')) as email, " +
+                "cus.create, cus.modify, cus.number " +
+                "from custom as cus " +
+                $"inner join (select distinct object from journal where opera == 2 and between(ttod(saled),date()-30*{monthsNumber}, date())) as jour on jour.object == cus.number " +
+                "inner join customp as cusp on cusp.number == cus.pref " +
+                "inner join customf as cf ON cus.number == cf.number " +
+                "where not(empty(inn))\"";
+            return await GetObjectsFromQueryAsync<List<User>>(query);
+        }
+
         private async Task<User?> GetProvider(long customId)
         {
             var query = "\"select alltrim(cusp.name) + alltrim(cus.c_pref) + alltrim(cus.name) + alltrim(cus.c_suff) as name, " +
@@ -129,6 +185,7 @@ namespace ProdmasterProvidersService.Services
                 "inner join stock as stock on st1.stock == stock.number " +
                 $"where not st1.arch and st2.custom == 751601 and st1.custom == {customId}\"";
             return GetObjectsFromQueryAsync<List<Product>>(query);
+
         }
         private async Task<IEnumerable<Specification>?> GetSpecificationsForProvider(long customId, long providerId)
         {
@@ -196,6 +253,12 @@ namespace ProdmasterProvidersService.Services
         private async Task UpdateSpecifications(IEnumerable<Specification> specifications)
         {
             await _specificationRepository.AddOrUpdateRange(specifications);
+        }
+
+        private string GeneratePassword()
+        {
+            Random rnd = new Random();
+            return rnd.Next(111111, 999999).ToString();
         }
     }
 }
