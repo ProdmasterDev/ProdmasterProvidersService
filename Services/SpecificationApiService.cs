@@ -101,7 +101,7 @@ namespace ProdmasterProvidersService.Services
             var specifications = await GetSpecifications(specificationIds);
             try
             {
-                await UpdateSpecificationStatus(specifications, VerifyState.Sended);
+                await UpdateSpecificationStatus(specifications, VerifyState.Verified);
                 return true;
             }
             catch
