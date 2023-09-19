@@ -29,6 +29,10 @@ body {
 	background: #00196c;
 }
 
+.text-like-navbar-background {
+	color: #00196c;
+}
+
 .clickable-row {
 	transition: .3s;
 }
@@ -40,6 +44,7 @@ body {
 
 th, td, tr {
 	border: 1px solid #aeaeae;
+	text-align: center;
 	/*border-radius: 5px;*/
 }
 
@@ -74,3 +79,4 @@ table {
 option:disabled {
 	color: #0000004a;
 }
+

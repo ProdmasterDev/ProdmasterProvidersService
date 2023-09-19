@@ -57,7 +57,7 @@
                 @for (int i = 0; i < Model.Products.Count; i++)
                 {
                     <tr data-index="@i">
-                        <td>
+                        <td class="text-start">
                             <div>@ViewBag.ProductNames[Model.Products[i].Id]</div>
                             <input type="hidden" class="specification-product-id" asp-for="@Model.Products[i].Id">
                         </td>

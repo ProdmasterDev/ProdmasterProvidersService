@@ -32,9 +32,9 @@
                         @foreach (var item in group)
                         {
                             <tr>
-                                <td>
+                                <td class="text-start">
                                     <a href="#" class="link-info standard-detail" data-bs-toggle="modal" data-bs-target="#standardModal" sid="@item.Id">
-                                        @item.Name
+                                        @item.Name.ToLower()
                                     </a>
                                 </td>
                                 <td>@item.UnitName</td>
