@@ -1,13 +1,13 @@
 ﻿@model ProvidersDomain.ViewModels.Catalog.ProductModel
 @{
-    ViewData["Title"] = Model.Name;
+    ViewData["Title"] = Model.Name.ToLower();
 }
 
-<h2 class="mb-5">@Model.Name</h2>
+<h2 class="mb-5">@Model.Name.ToLower()</h2>
 
 <div class="mb-3">
     <label class="fw-bold" asp-for="@Model.StandartId"></label><br>
-    <p class="ms-3">@(Model.Standart?.Name ?? "Не указан")</p>
+    <p class="ms-3">@(Model.Standart?.Name.ToLower() ?? "Не указан")</p>
 </div>
 <div class="mb-3">
     <label class="fw-bold" asp-for="@Model.Quantity"></label><br>
@@ -15,11 +15,18 @@
 </div>
 <div class="mb-3">
     <label class="fw-bold" asp-for="@Model.Name"></label><br />
-    <p class="ms-3">@Model.Name</p>
+    <p class="ms-3">@Model.Name.ToLower()</p>
 </div>
 <div class="mb-3">
     <label class="fw-bold" asp-for="@Model.VendorCode"></label><br />
-    <p class="ms-3">@Model.VendorCode</p>
+    @if (!string.IsNullOrEmpty(Model.Brand))
+    {
+        <p class="ms-3">@(Model.VendorCode ?? "Не указан")</p>
+    }
+    else
+    {
+        <p class="ms-3">Не указан</p>
+    }
 </div>
 @if (!string.IsNullOrEmpty(Model.ManufacturerName))
 {
@@ -37,7 +44,14 @@ else
 }
 <div class="mb-3">
     <label class="fw-bold" asp-for="@Model.Brand"></label><br />
-    <p class="ms-3">@(Model.Brand ?? "Не указан")</p>
+    @if (!string.IsNullOrEmpty(Model.Brand))
+    {
+        <p class="ms-3">@Model.Brand</p>
+    }
+    else
+    {
+        <p class="ms-3">Не указан</p>
+    }
 </div>
 <div class="mb-3">
     <label class="fw-bold" asp-for="@Model.CountryId"></label><br>

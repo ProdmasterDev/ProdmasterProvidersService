@@ -36,9 +36,9 @@
         {
             <tr>
                 <td class="text-start">
-                    <a asp-controller="Catalog" asp-action="EditProduct" asp-route-id="@Model.Products[i].Id">@Model.Products[i].Name</a>
+                    <a asp-controller="Catalog" asp-action="EditProduct" asp-route-id="@Model.Products[i].Id" class="text-decoration-none text-like-navbar-background">@Model.Products[i].Name.ToLower()</a>
                 </td>
-                <td class="text-end">
+                <td class="text-center">
                     @(Model.Products[i].Price?.ToString("#,##0.00") ?? "0.00")
                 </td>
             </tr>

@@ -46,15 +46,19 @@
             {
                 <input class="check-delete" type="checkbox" data-id="@product.Id" />
             }
+            else
+            {
+                <input class="check-delete" type="checkbox" data-id="@product.Id" disabled/>
+            }
         </td>
         <td>@(i + 1)</td>
         <td>@product.VendorCode</td>
-        <td>@product.Standart.Name</td>
-        <td>@product.Name</td>
+        <td class="text-start">@product.Standart.Name.ToLower()</td>
+        <td class="text-start">@product.Name.ToLower()</td>
         <td>@(product.Standart.Unit?.Short ?? "-")</td>
         <td>@product.Quantity</td>
         <td>@price</td>
         <td>@(product.Manufacturer?.Name ?? product.ManufacturerName)</td>
-        <td>@verifyState</td>
+        <td class="mx-3">@verifyState</td>
     </tr>
 }

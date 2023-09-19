@@ -1,11 +1,11 @@
 ﻿@model ProvidersDomain.Models.Standart
 <div class="modal-header">
-    <h5 class="modal-title" id="serviceLabel">@Model.Name</h5>
+    <h5 class="modal-title" id="serviceLabel">@Model.Name.ToLower()</h5>
     <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
 </div>
 <div class="modal-body">
     <strong>
-        @Html.DisplayNameFor(model => model.Taste)
+        @Html.DisplayNameFor(model => model.Taste).ToLower()
     </strong>
     <p>@(Model.Taste ?? "Не указан")</p>
     @*<strong>
@@ -15,19 +15,19 @@
         @(Model.Smell ?? "Не указан")
     </p>*@
     <strong>
-        @Html.DisplayNameFor(model => model.Color)
+        @Html.DisplayNameFor(model => model.Color).ToLower()
     </strong>
     <p>
         @(Model.Color ?? "Не указан")
     </p>
     <strong>
-        @Html.DisplayNameFor(model => model.Structure)
+        @Html.DisplayNameFor(model => model.Structure).ToLower()
     </strong>
     <p>
         @(Model.Structure ?? "Не указана")
     </p>
     <strong>
-        @Html.DisplayNameFor(model => model.Consistenc)
+        @Html.DisplayNameFor(model => model.Consistenc).ToLower()
     </strong>
     <p>
         @(Model.Consistenc ?? "Не указана")

@@ -44,6 +44,10 @@
             {
                 <input class="check-delete-spec" type="checkbox" data-id="@Model.Specifications[i].Id" />
             }
+            else
+            {
+                <input class="check-delete-spec" type="checkbox" data-id="@Model.Specifications[i].Id" disabled/>
+            }
         </td>
         <td>@(i + 1)</td>
         <td>@Model.Specifications[i].CreatedAt</td>
