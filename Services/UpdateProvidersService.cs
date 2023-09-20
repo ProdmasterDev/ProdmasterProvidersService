@@ -260,5 +260,25 @@ namespace ProdmasterProvidersService.Services
             Random rnd = new Random();
             return rnd.Next(111111, 999999).ToString();
         }
+
+        //private async Task AddOrUpdateSpecifications(IEnumerable<Specification> specifications)
+        //{
+        //    if (!specifications.Any()) return;
+        //    foreach (var specification in specifications)
+        //    {
+        //        if(!specification.Products.Any()) { break; }
+        //        foreach (var product in specification.Products)
+        //        {
+
+        //        }
+
+        //        var dbProvider = await _specificationRepository.First(s => s.DisanId == specification.DisanId);
+        //        if (dbProvider != null)
+        //        {
+        //            await _specificationRepository.Update(specification);
+        //        }
+        //        await _specificationRepository.Add(specification);
+        //    }
+        //}
     }
 }

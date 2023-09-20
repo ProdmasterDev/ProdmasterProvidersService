@@ -2,6 +2,10 @@
 using System.Linq.Expressions;
 using System;
 using ProvidersDomain.Models;
+using EFCore.BulkExtensions;
+using Microsoft.EntityFrameworkCore;
+using Microsoft.EntityFrameworkCore.Migrations.Operations;
+using System.Collections.Generic;
 
 namespace ProdmasterProvidersService.Repositories
 {
@@ -27,6 +31,25 @@ namespace ProdmasterProvidersService.Repositories
             {
                 return false;
             }
+        }
+
+        public new async Task AddOrUpdateRange(IEnumerable<Specification> range)
+        {
+            try
+            {
+                var bulkConfig = new BulkConfig
+                {
+                    SetOutputIdentity = true,
+                    BatchSize = 4000,
+                    UpdateByProperties = new List<string> { nameof(Specification.DisanId) },
+                    PropertiesToExclude = new List<string> { nameof(Specification.Id) },
+                    //PropertiesToInclude = new List<string> { nameof(Specification.DisanId) }
+                };
+                await _dbContext.BulkInsertOrUpdateAsync(range, bulkConfig);
+                await _dbContext.BulkSaveChangesAsync();
+            }
+            catch (DbUpdateException exception) {}
+            catch (Exception exception) { var a = exception.Message; }
         }
     }
 }

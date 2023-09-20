@@ -39,6 +39,8 @@ namespace ProdmasterProvidersService.Database
                     j.HasKey(t => new { t.ProductId, t.SpecificationId });
                     j.ToTable("ProductSpecifications");
                 });
+            modelBuilder
+                .Entity<Specification>().HasIndex(s => s.DisanId).IsUnique().HasName(nameof(Specification.DisanId));
         }
 
         public override Task<int> SaveChangesAsync(CancellationToken cancellationToken = new CancellationToken())
