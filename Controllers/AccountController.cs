@@ -79,42 +79,42 @@ namespace ProdmasterProvidersService.Controllers
             return View(model);
         }
         
-        [AllowAnonymous]
-        [HttpGet("register")]
-        public async Task<IActionResult> Register()
-        {
-            if (await Authorized()) return RedirectToAction(nameof(Index), "Account");
+        //[AllowAnonymous]
+        //[HttpGet("register")]
+        //public async Task<IActionResult> Register()
+        //{
+        //    if (await Authorized()) return RedirectToAction(nameof(Index), "Account");
 
-            return View();
-        }
+        //    return View();
+        //}
         
-        [AllowAnonymous]
-        [HttpPost("register")]
-        [ValidateAntiForgeryToken]
-        public async Task<IActionResult> Register(RegisterModel model)
-        {
-            if (await Authorized()) return RedirectToAction(nameof(Index), "Account");
+        //[AllowAnonymous]
+        //[HttpPost("register")]
+        //[ValidateAntiForgeryToken]
+        //public async Task<IActionResult> Register(RegisterModel model)
+        //{
+        //    if (await Authorized()) return RedirectToAction(nameof(Index), "Account");
 
-            if (ModelState.IsValid)
-            {
-                try
-                {
-                    if (!await _userService.UserExists(model))                    
-                    {
-                        var user = await _userService.Add(model);
-                        await Authenticate(user.Email);
-                        return RedirectToAction(nameof(HomeController.Index), nameof(HomeController).Replace("Controller", ""));                        
-                    }
-                    ModelState.AddModelError("", "Пользователь с таким email или ИНН уже зарегистрирован!");
+        //    if (ModelState.IsValid)
+        //    {
+        //        try
+        //        {
+        //            if (!await _userService.UserExists(model))                    
+        //            {
+        //                var user = await _userService.Add(model);
+        //                await Authenticate(user.Email);
+        //                return RedirectToAction(nameof(HomeController.Index), nameof(HomeController).Replace("Controller", ""));                        
+        //            }
+        //            ModelState.AddModelError("", "Пользователь с таким email или ИНН уже зарегистрирован!");
                     
-                }
-                catch
-                {
-                    ModelState.AddModelError("", "Не удалось войти");
-                }
-            }
-            return View(model);
-        }
+        //        }
+        //        catch
+        //        {
+        //            ModelState.AddModelError("", "Не удалось войти");
+        //        }
+        //    }
+        //    return View(model);
+        //}
         
         [HttpGet("logout")]
         public async Task<IActionResult> Logout()

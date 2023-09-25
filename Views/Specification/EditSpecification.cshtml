@@ -96,10 +96,10 @@
     <input type="hidden" name="specificationId" value="@Model.Id">
 </form>
 <div>
-    <input name="SaveOption" type="submit" form="editSpecification" value="Отправить" class="btn btn-outline-dark" />
+    <input name="SaveOption" type="submit" form="editSpecification" value="Сохранить и отправить" class="btn btn-outline-dark" />
     @if (Model.Id == default || Model.VerifyState == ProvidersDomain.Models.VerifyState.Draft)
     {
-        <input name="SaveOption" type="submit" form="editSpecification" value="Сохранить" class="btn btn-outline-dark" />
+        <input name="SaveOption" type="submit" form="editSpecification" value="Сохранить как черновик" class="btn btn-outline-dark" />
     }
     @if (Model.Id != default)
     {
