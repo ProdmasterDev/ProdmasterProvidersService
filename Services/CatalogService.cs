@@ -38,7 +38,8 @@ namespace ProdmasterProvidersService.Services
                     VendorCode = product.VendorCode,
                     Quantity = product.Quantity, 
                     StandartId = product.Standart.Id,
-                    Standart = product.Standart,                    
+                    Standart = product.Standart,
+                    WithEmptyManufacturer = (product.ManufacturerId == default) ? true : false,
                     ManufacturerId = product.ManufacturerId,
                     ManufacturerName = product.ManufacturerName,
                     Brand = product.Brand,
@@ -47,7 +48,7 @@ namespace ProdmasterProvidersService.Services
                     Note = product.Note,
                     VerifyState = product.VerifyState,
                     VerifyNote = product.VerifyNote,
-                    SpecificationId = user?.Specifications?.FirstOrDefault(c => c.CreatedAt.Date == DateTime.Now.Date && !c.Products.Contains(product))?.Id,
+                    SpecificationId = user?.Specifications?.Where(c => c.LastModified.Date == DateTime.Now.Date && !c.Products.Contains(product) && (c.VerifyState == VerifyState.NotSended || c.VerifyState == VerifyState.Draft)).OrderByDescending(s => s.LastModified).LastOrDefault()?.Id,
                     LastPrice = price,
                 };
             }
@@ -81,8 +82,16 @@ namespace ProdmasterProvidersService.Services
             entity.VendorCode = product.VendorCode;
             entity.Quantity = product.Quantity.Value;
             entity.StandartId = product.StandartId.Value;
-            entity.ManufacturerId = product.ManufacturerId;
-            entity.ManufacturerName = product.ManufacturerName;
+            if (product.WithEmptyManufacturer)
+            {
+                entity.ManufacturerId = default;
+                entity.ManufacturerName = default;
+            }
+            else
+            {
+                entity.ManufacturerId = product.ManufacturerId;
+                entity.ManufacturerName = product.ManufacturerName;
+            }
             entity.Brand = product.Brand;
             entity.CountryId = product.CountryId;
             entity.Note = product.Note;

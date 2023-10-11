@@ -1,11 +1,13 @@
 ﻿@model ProvidersDomain.ViewModels.Catalog.CatalogModel
 @{
     ViewData["Title"] = "Каталог товаров";
+    var selectOrderProperty = new SelectList(ViewBag.OrderProperty, "Key", "Value");
+    var selectDirection = new SelectList(ViewBag.Direction, "Key", "Value");
 }
 
 <h2 class="mb-5 display-4">Каталог товаров</h2>
 
-<div class="btn-toolbar mb-3" role="toolbar">
+<div class="btn-toolbar mb-3 d-flex justify-content-between" role="toolbar">
     <div class="btn-group" role="group">
         <button id="deleteProduct" type="button" class="btn btn-danger" disabled>
             <span class="spinner-border spinner-border-sm d-none" role="status" aria-hidden="true"></span>
@@ -13,6 +15,21 @@
         </button>
         <a asp-controller="Catalog" asp-action="EditProduct" class="btn btn-outline-dark">Добавить</a>
     </div>
+    <div class="select-group d-inline-flex">
+        <select id="selectOrder" class="form-select" asp-items="@selectOrderProperty" onchange="RefreshProductsTable()"></select>
+        <select id="selectDirection" class="form-select" asp-items="@selectDirection" onchange="RefreshProductsTable()"></select>
+    </div>
+</div>
+@* <div class="mb-3 search">
+    <input id="search" class="form-control" type="text" />
+</div> *@
+
+<div id="searchForm" class="input-group mb-3">
+    <input type="text" id="search" class="form-control" />
+    <button type="button" id="searchBtn" class="btn btn-primary" onclick="RefreshProductsTable()">
+        Поиск
+        <span id="searchSpinner" class="d-none spinner-border spinner-border-sm" role="status" aria-hidden="true"></span>
+    </button>
 </div>
 <div class="row g-3" style="overflow-x:auto;">
     <table cellpadding="3" cellspacing="0" class="position-relative">

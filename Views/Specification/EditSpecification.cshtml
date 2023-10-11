@@ -96,16 +96,17 @@
     <input type="hidden" name="specificationId" value="@Model.Id">
 </form>
 <div>
-    <input name="SaveOption" type="submit" form="editSpecification" value="Отправить" class="btn btn-outline-dark" />
+    @* от value в контроллере выбирается сохранять как черновик или как новую спецификацию, изменять в паре  *@
+    <input name="SaveOption" type="submit" form="editSpecification" value="Сохранить и отправить" class="btn btn-primary" />
     @if (Model.Id == default || Model.VerifyState == ProvidersDomain.Models.VerifyState.Draft)
     {
-        <input name="SaveOption" type="submit" form="editSpecification" value="Сохранить" class="btn btn-outline-dark" />
+        <input name="SaveOption" type="submit" form="editSpecification" value="Сохранить как черновик" class="btn btn-outline-dark" />
     }
     @if (Model.Id != default)
     {
         <input type="submit" form="copySpecification" value="Создать спецификацию на основании этой" class="btn btn-outline-dark" />
     }
-    <button id="cancel" class="btn btn-outline-secondary" onclick="history.back();">Назад</button>
+    <button id="cancel" class="btn btn-outline-danger" onclick="history.back();">Назад</button>
 </div>
 
 <script>

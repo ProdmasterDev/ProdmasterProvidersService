@@ -78,7 +78,7 @@ namespace ProdmasterProvidersService.Controllers
             }
             return View(model);
         }
-        
+
         [AllowAnonymous]
         [HttpGet("register")]
         public async Task<IActionResult> Register()
@@ -87,7 +87,7 @@ namespace ProdmasterProvidersService.Controllers
 
             return View();
         }
-        
+
         [AllowAnonymous]
         [HttpPost("register")]
         [ValidateAntiForgeryToken]
@@ -99,14 +99,14 @@ namespace ProdmasterProvidersService.Controllers
             {
                 try
                 {
-                    if (!await _userService.UserExists(model))                    
+                    if (!await _userService.UserExists(model))
                     {
                         var user = await _userService.Add(model);
                         await Authenticate(user.Email);
-                        return RedirectToAction(nameof(HomeController.Index), nameof(HomeController).Replace("Controller", ""));                        
+                        return RedirectToAction(nameof(HomeController.Index), nameof(HomeController).Replace("Controller", ""));
                     }
                     ModelState.AddModelError("", "Пользователь с таким email или ИНН уже зарегистрирован!");
-                    
+
                 }
                 catch
                 {
@@ -115,7 +115,7 @@ namespace ProdmasterProvidersService.Controllers
             }
             return View(model);
         }
-        
+
         [HttpGet("logout")]
         public async Task<IActionResult> Logout()
         {

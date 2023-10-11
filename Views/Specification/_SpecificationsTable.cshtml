@@ -50,10 +50,10 @@
             }
         </td>
         <td>@(i + 1)</td>
-        <td>@Model.Specifications[i].CreatedAt</td>
-        <td>@Model.Specifications[i].LastModified</td>
+        <td>@Model.Specifications[i].CreatedAt.ToLocalTime()</td>
+        <td>@Model.Specifications[i].LastModified.ToLocalTime()</td>
         <td>
-            @Model.Specifications[i].StartsAt.ToString("dd.MM.yyyy") - @Model.Specifications[i].ExpiresAt.ToString("dd.MM.yyyy") (@((Model.Specifications[i].ExpiresAt - Model.Specifications[i].StartsAt).TotalDays)д.)
+            @Model.Specifications[i].StartsAt.ToLocalTime().ToString("dd.MM.yyyy") - @Model.Specifications[i].ExpiresAt.ToLocalTime().ToString("dd.MM.yyyy") (@((Model.Specifications[i].ExpiresAt - Model.Specifications[i].StartsAt).TotalDays)д.)
         </td>
         <td>@Model.Specifications[i].Products.Count</td>
         <td>@verifyState</td>

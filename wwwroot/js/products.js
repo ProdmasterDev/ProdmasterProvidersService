@@ -63,13 +63,61 @@ function DeleteProducts() {
 }
 
 function RefreshProductsTable() {
+    data = GetDataForRefreshTable();
     $(".clickable-row td").html("<span></span>");
     $.ajax({
         url: "/catalog/refreshProductsTable",
         method: 'GET',
+        data,
         success: (html) => {
             $('table tbody').html(html);
             $('table').removeClass("loading");
         }
     });
 }
+
+function ShowHideManufacturer(element) {
+    $("label[for='ManufacturerId']").parent().toggleClass("d-none");
+    $("label[for='ManufacturerName']").parent().toggleClass("d-none");
+}
+
+function ChangeOrder() {
+    let order = $("#selectOrder").val();
+    let direction = $("#selectDirection").val();
+    $(".clickable-row td").html("<span></span>");
+    $.ajax({
+        url: "/catalog/refreshProductsTable",
+        method: 'GET',
+        data: {
+            propertyNameForOrder: order,
+            orderDirection: direction
+        },
+        success: (html) => {
+            $('table tbody').html(html);
+            $('table').removeClass("loading");
+        }
+    });
+}
+
+function GetDataForRefreshTable() {
+    let order = $("#selectOrder").val();
+    let direction = $("#selectDirection").val();
+    let search = $("#search").val();
+    data = {
+        propertyNameForOrder: order,
+        orderDirection: direction,
+        searchString: search,
+    }
+    return data;
+}
+
+$("#search").keypress(function (event) {
+    var keycode = (event.keyCode ? event.keyCode : event.which);
+    if (keycode == '13') {
+        RefreshProductsTable();
+    }
+});
+
+$("#search").focusout(function (event) {
+    RefreshProductsTable();
+})

@@ -25,6 +25,26 @@ namespace ProdmasterProvidersService.Services
             _specificationRepository = specificationRepository;
         }
 
+        //public async Task LoadProviders()
+        //{
+        //    var providers = await GetLastNMonthProviders(2);
+
+        //    if (providers != null)
+        //    {
+        //        foreach (var provider in providers)
+        //        {
+        //            try
+        //            {
+        //                await LoadProvider(provider);
+        //            }
+        //            catch(Exception ex)
+        //            {
+        //                Console.WriteLine(ex.Message);
+        //            }
+        //        }
+        //    }
+        //}
+
         public async Task LoadProviders()
         {
             var providers = await GetLastNMonthProviders(2);
@@ -35,9 +55,9 @@ namespace ProdmasterProvidersService.Services
                 {
                     try
                     {
-                        await LoadProvider(provider);
+                        await LoadProvider(provider.DisanId, GeneratePassword());
                     }
-                    catch(Exception ex)
+                    catch (Exception ex)
                     {
                         Console.WriteLine(ex.Message);
                     }
@@ -52,7 +72,7 @@ namespace ProdmasterProvidersService.Services
                 ?? await AddProvider(provider, GeneratePassword());
 
             var products = await GetProductsForProvider(user.DisanId);
-            if (products != null)
+            if (products != null && products.Count > 0)
             {
                 products.ForEach(c => c.UserId = user.Id);
                 await AddProducts(products);
@@ -70,14 +90,27 @@ namespace ProdmasterProvidersService.Services
 
             if (provider != null)
             {
+                //var dbProvider = await _userRepository.First(x => x.DisanId == provider.DisanId) ?? await _userRepository.First(x => x.INN == provider.INN);
+
+
+                //if (dbProvider != null) throw new Exception("User exsists");
+
+                //provider = await AddProvider(provider, password);
+
                 var dbProvider = await _userRepository.First(x => x.DisanId == provider.DisanId) ?? await _userRepository.First(x => x.INN == provider.INN);
 
-                if (dbProvider != null) throw new Exception("User exsists");
 
-                provider = await AddProvider(provider, password);
+                if (dbProvider != null)
+                {
+                    provider = dbProvider;
+                }
+                else
+                {
+                    provider = await AddProvider(provider, password);
+                }
 
                 var products = await GetProductsForProvider(customId);
-                if (products != null)
+                if (products != null && products.Count > 0) 
                 {
                     products.ForEach(c => c.UserId = provider.Id);
                     await AddProducts(products);
@@ -86,7 +119,7 @@ namespace ProdmasterProvidersService.Services
                 var specifications = await GetSpecificationsForProvider(customId, provider.Id);
                 if (specifications != null)
                 {
-                    await UpdateSpecifications(specifications);
+                    await AddOrUpdateSpecifications(specifications);
                 }
             }
         }
@@ -152,23 +185,23 @@ namespace ProdmasterProvidersService.Services
 
         private async Task<IEnumerable<User>?> GetLastNMonthProviders(long monthsNumber)
         {
-            var query = "\"select alltrim(cusp.name) + alltrim(cus.c_pref) + alltrim(cus.name) + alltrim(cus.c_suff) as name, " +
-                "IIF(LEN(ALLTRIM(inn)) == 12, ALLTRIM(inn), IIF(EMPTY(inn), SPACE(12), STREXTRACT(cus.inn, '',';'))) as inn, " +
+            var query = "\"select alltrim(cusp.name) + chr(32) + alltrim(cus.c_pref) + alltrim(cus.name) + alltrim(cus.c_suff) as name, " +
+                "IIF(';'$cus.inn, STREXTRACT(cus.inn, '',';'), ALLTRIM(cus.inn)) as inn, " +
                 "ALLTRIM(cf.tel) as phone, " +
                 "ALLTRIM(STREXTRACT(cf.email + ';', '', ';')) as email, " +
                 "cus.create, cus.modify, cus.number " +
                 "from custom as cus " +
-                $"inner join (select distinct object from journal where opera == 2 and between(ttod(saled),date()-30*{monthsNumber}, date())) as jour on jour.object == cus.number " +
+                $"inner join (select distinct object from journal where not(kind == 2) and opera == 2 and between(ttod(saled),date()-30*{monthsNumber}, date())) as jour on jour.object == cus.number " +
                 "inner join customp as cusp on cusp.number == cus.pref " +
                 "inner join customf as cf ON cus.number == cf.number " +
-                "where not(empty(inn))\"";
+                "where not(empty(inn)) and not(empty(email))\"";
             return await GetObjectsFromQueryAsync<List<User>>(query);
         }
 
         private async Task<User?> GetProvider(long customId)
         {
-            var query = "\"select alltrim(cusp.name) + alltrim(cus.c_pref) + alltrim(cus.name) + alltrim(cus.c_suff) as name, " +
-                "IIF(LEN(ALLTRIM(inn)) == 12, ALLTRIM(inn), IIF(EMPTY(inn), SPACE(12), STREXTRACT(cus.inn, '',';'))) as inn, " +
+            var query = "\"select alltrim(cusp.name) + chr(32) + alltrim(cus.c_pref) + alltrim(cus.name) + alltrim(cus.c_suff) as name, " +
+                "IIF(EMPTY(ALLTRIM(inn)), SPACE(12),IIF(';'$cus.inn, STREXTRACT(cus.inn, '',';'), ALLTRIM(cus.inn))) as inn, " +
                 "ALLTRIM(cf.tel) as phone, " +
                 "ALLTRIM(STREXTRACT(cf.email + ';', '', ';')) as email, " +
                 "cus.create, cus.modify, cus.number " +
@@ -180,10 +213,14 @@ namespace ProdmasterProvidersService.Services
         }
         private Task<List<Product>?> GetProductsForProvider(long customId)
         {
-            var query = "\"select st1.number, IIF(EMPTY(st1.nameprod),stock.name,st1.nameprod) as nameprod, st1.price, st1.minkvant, st1.article, st1.create, st1.modify, st1.country, st1.brand, st1.manufact, st1.stock, st2.number as parent from standart as st1 " +
+            var query = "\"select st1.number, iif(empty(st1.nameprod),stock.name,st1.nameprod) as nameprod, st1.price, TRANSFORM(st1.minkvant,'9999.999') as minkvant, st1.article, st1.create, st1.modify, st1.country, st1.brand, st1.manufact, st1.stock as stock, st2.number as parent from standart as st1 " +
                 "inner join standart as st2 on st1.stock == st2.stock " +
                 "inner join stock as stock on st1.stock == stock.number " +
                 $"where not st1.arch and st2.custom == 751601 and st1.custom == {customId}\"";
+            //var query = "\"select VAL(STR(st1.number)) as number, IIF(EMPTY(st1.nameprod),stock.name,st1.nameprod) as nameprod, VAL(STR(st1.price)) as price, VAL(STR(st1.minkvant)) as minkvant, st1.article, st1.create, st1.modify, st1.country, st1.brand, st1.manufact, VAL(STR(st1.stock)) as stock, VAL(STR(st2.number)) as parent from standart as st1 " +
+            //    "inner join standart as st2 on st1.stock == st2.stock " +
+            //    "inner join stock as stock on st1.stock == stock.number " +
+            //    $"where not st1.arch and st2.custom == 751601 and st1.custom == {customId}\"";
             return GetObjectsFromQueryAsync<List<Product>>(query);
 
         }
@@ -199,7 +236,8 @@ namespace ProdmasterProvidersService.Services
 
             if (specifications == null) return null;
 
-            specifications.ToList().ForEach(c => c.UserId = providerId);
+            //specifications.ToList().ForEach(c => c.UserId = providerId);
+            specifications.ToList();
             specifications = await AddSpecifications(specifications);
 
             query = "\"select jr.number as jr, rf.price, rf.standart " +
@@ -244,8 +282,10 @@ namespace ProdmasterProvidersService.Services
             {
                 if (specification != null)
                 {
-                    var dbSpec = await _specificationRepository.Add(specification);
-                    if (dbSpec != null) specificationList.Add(dbSpec);
+                    if (_specificationRepository.First(s => s.DisanId == specification.DisanId) == null){
+                        var dbSpec = await _specificationRepository.Add(specification);
+                        if (dbSpec != null) specificationList.Add(dbSpec);
+                    }
                 }
             }
             return specificationList;
@@ -261,24 +301,37 @@ namespace ProdmasterProvidersService.Services
             return rnd.Next(111111, 999999).ToString();
         }
 
-        //private async Task AddOrUpdateSpecifications(IEnumerable<Specification> specifications)
-        //{
-        //    if (!specifications.Any()) return;
-        //    foreach (var specification in specifications)
-        //    {
-        //        if(!specification.Products.Any()) { break; }
-        //        foreach (var product in specification.Products)
-        //        {
+        private async Task AddOrUpdateSpecifications(IEnumerable<Specification> specifications)
+        {
+            if (!specifications.Any()) return;
+            foreach (var specification in specifications)
+            {
+                //if (!specification.Products.Any()) { break; }
+                //foreach (var product in specification.Products)
+                //{
+                //    var dbProduct = await _specificationRepository.First(s => s.DisanId == product.DisanId);
+                //    if (dbProduct == null)
+                //    {
+                //        await _productRepository.Add(product);
+                //    }
+                //    else
+                //    {
+                //        //await _productRepository.Update(product);
+                //    }
+                    
+                //}
 
-        //        }
-
-        //        var dbProvider = await _specificationRepository.First(s => s.DisanId == specification.DisanId);
-        //        if (dbProvider != null)
-        //        {
-        //            await _specificationRepository.Update(specification);
-        //        }
-        //        await _specificationRepository.Add(specification);
-        //    }
-        //}
+                var dbProvider = await _specificationRepository.First(s => s.DisanId == specification.DisanId);
+                if (dbProvider != null)
+                {
+                    //await _specificationRepository.Update(specification);
+                }
+                else
+                {
+                    await _specificationRepository.Add(specification);
+                }
+                
+            }
+        }
     }
 }

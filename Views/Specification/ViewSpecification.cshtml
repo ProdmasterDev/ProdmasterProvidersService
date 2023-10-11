@@ -3,7 +3,7 @@
     ViewData["Title"] = $"Спецификация от {Model.CreatedAt}";
 }
 
-<h2 class="mb-5">Спецификация от @Model.CreatedAt</h2>
+<h2 class="mb-5">Спецификация от @Model.CreatedAt.ToLocalTime()</h2>
 
 <div class="mb-3">
     <label class="fw-bold">Действие спецификации</label><br>
@@ -13,11 +13,11 @@
 </div>
 <div class="mb-3">
     <label class="fw-bold" asp-for="@Model.CreatedAt"></label><br>
-    <p class="ms-3">@Model.CreatedAt</p>
+    <p class="ms-3">@Model.CreatedAt.ToLocalTime()</p>
 </div>
 <div class="mb-3">
     <label class="fw-bold" asp-for="@Model.LastModified"></label><br />
-    <p class="ms-3">@Model.LastModified</p>
+    <p class="ms-3">@Model.LastModified.ToLocalTime()</p>
 </div>
 <table cellpadding="10" class="mb-3">
     <thead class="text-center">
