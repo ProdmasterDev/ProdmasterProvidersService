@@ -15,8 +15,10 @@ using System.Reflection;
 
 var builder = WebApplication.CreateBuilder(args);
 
+
+
 //Services
-{ 
+{
     builder.Services.AddScoped<IUserService, UserService>();
     builder.Services.AddScoped<ICatalogService, CatalogService>();
     builder.Services.AddScoped<ISpecificationService, SpecificationService>();
@@ -80,18 +82,24 @@ builder.Services.AddSwaggerGen(c =>
 
 void ConfigureUserContextConnection(DbContextOptionsBuilder options)
 {
+    String connectionStringTag = "UserContext";
+    #if DEBUG
+        connectionStringTag = "UserContextDev";
+    #endif
     options.UseLazyLoadingProxies()
-        .UseNpgsql(builder.Configuration.GetConnectionString("UserContext")).ConfigureWarnings(w => w.Ignore(CoreEventId.LazyLoadOnDisposedContextWarning))
+        .UseNpgsql(builder.Configuration.GetConnectionString(connectionStringTag)).ConfigureWarnings(w => w.Ignore(CoreEventId.LazyLoadOnDisposedContextWarning))
         .EnableSensitiveDataLogging();
 }
 
 var app = builder.Build();
 
+#if DEBUG
 app.UseSwagger()
     .UseSwaggerUI(c =>
     {
         c.SwaggerEndpoint("/swagger/v1/swagger.json", "v1");
     });
+#endif
 
 // Configure the HTTP request pipeline.
 if (!app.Environment.IsDevelopment())

@@ -72,7 +72,7 @@ namespace ProdmasterProvidersService.Services
                 ?? await AddProvider(provider, GeneratePassword());
 
             var products = await GetProductsForProvider(user.DisanId);
-            if (products != null)
+            if (products != null && products.Count > 0)
             {
                 products.ForEach(c => c.UserId = user.Id);
                 await AddProducts(products);
@@ -110,7 +110,7 @@ namespace ProdmasterProvidersService.Services
                 }
 
                 var products = await GetProductsForProvider(customId);
-                if (products != null)
+                if (products != null && products.Count > 0) 
                 {
                     products.ForEach(c => c.UserId = provider.Id);
                     await AddProducts(products);
@@ -119,7 +119,7 @@ namespace ProdmasterProvidersService.Services
                 var specifications = await GetSpecificationsForProvider(customId, provider.Id);
                 if (specifications != null)
                 {
-                    await UpdateSpecifications(specifications);
+                    await AddOrUpdateSpecifications(specifications);
                 }
             }
         }
@@ -236,7 +236,8 @@ namespace ProdmasterProvidersService.Services
 
             if (specifications == null) return null;
 
-            specifications.ToList().ForEach(c => c.UserId = providerId);
+            //specifications.ToList().ForEach(c => c.UserId = providerId);
+            specifications.ToList();
             specifications = await AddSpecifications(specifications);
 
             query = "\"select jr.number as jr, rf.price, rf.standart " +
@@ -281,8 +282,10 @@ namespace ProdmasterProvidersService.Services
             {
                 if (specification != null)
                 {
-                    var dbSpec = await _specificationRepository.Add(specification);
-                    if (dbSpec != null) specificationList.Add(dbSpec);
+                    if (_specificationRepository.First(s => s.DisanId == specification.DisanId) == null){
+                        var dbSpec = await _specificationRepository.Add(specification);
+                        if (dbSpec != null) specificationList.Add(dbSpec);
+                    }
                 }
             }
             return specificationList;
@@ -298,24 +301,37 @@ namespace ProdmasterProvidersService.Services
             return rnd.Next(111111, 999999).ToString();
         }
 
-        //private async Task AddOrUpdateSpecifications(IEnumerable<Specification> specifications)
-        //{
-        //    if (!specifications.Any()) return;
-        //    foreach (var specification in specifications)
-        //    {
-        //        if(!specification.Products.Any()) { break; }
-        //        foreach (var product in specification.Products)
-        //        {
+        private async Task AddOrUpdateSpecifications(IEnumerable<Specification> specifications)
+        {
+            if (!specifications.Any()) return;
+            foreach (var specification in specifications)
+            {
+                //if (!specification.Products.Any()) { break; }
+                //foreach (var product in specification.Products)
+                //{
+                //    var dbProduct = await _specificationRepository.First(s => s.DisanId == product.DisanId);
+                //    if (dbProduct == null)
+                //    {
+                //        await _productRepository.Add(product);
+                //    }
+                //    else
+                //    {
+                //        //await _productRepository.Update(product);
+                //    }
+                    
+                //}
 
-        //        }
-
-        //        var dbProvider = await _specificationRepository.First(s => s.DisanId == specification.DisanId);
-        //        if (dbProvider != null)
-        //        {
-        //            await _specificationRepository.Update(specification);
-        //        }
-        //        await _specificationRepository.Add(specification);
-        //    }
-        //}
+                var dbProvider = await _specificationRepository.First(s => s.DisanId == specification.DisanId);
+                if (dbProvider != null)
+                {
+                    //await _specificationRepository.Update(specification);
+                }
+                else
+                {
+                    await _specificationRepository.Add(specification);
+                }
+                
+            }
+        }
     }
 }

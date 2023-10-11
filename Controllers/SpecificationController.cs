@@ -135,7 +135,7 @@ namespace ProdmasterProvidersService.Controllers
                     return RedirectToAction("Index", "Specification", new { id = model.Id });
                 }
                 var mode = SpecificationSaveMode.Draft;
-                if (SaveOption == "Отправить")
+                if (SaveOption == "Сохранить и отправить")
                 {
                     mode = SpecificationSaveMode.New;
                 }

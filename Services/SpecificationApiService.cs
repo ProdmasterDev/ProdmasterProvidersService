@@ -11,19 +11,23 @@ namespace ProdmasterProvidersService.Services
     {
         private readonly SpecificationRepository _specificationRepository;
         private readonly ProductRepository _productRepository;
-        public SpecificationApiService(SpecificationRepository specificationRepository, ProductRepository productRepository)
+        private readonly UserRepository _userRepository;
+        public SpecificationApiService(SpecificationRepository specificationRepository, ProductRepository productRepository, UserRepository userRepository)
         {
             _specificationRepository = specificationRepository;
             _productRepository = productRepository;
+            _userRepository = userRepository;
         }
 
         public async Task<IEnumerable<SpecificationApiModel>> GetNewSpecifications()
         {
+
             var specifications = await _specificationRepository.Select(c => c.VerifyState == VerifyState.NotSended || c.VerifyState == VerifyState.Corrected);
             return specifications.Select(c => new SpecificationApiModel
             {
                 Id = c.Id,
                 UserId = c.UserId,
+                CustomId = c.User.DisanId,
                 ProvidersName = c.User.Name,
                 INN = c.User.INN,
                 Email = c.User.Email,
@@ -72,6 +76,22 @@ namespace ProdmasterProvidersService.Services
             return _specificationRepository.AddOrUpdateRange(specifications);
         }
 
+        private Task UpdateSpecificationsDisanId(IEnumerable<Specification> specifications, VerifyState state)
+        {
+            foreach (var specification in specifications)
+            {
+                specification.VerifyState = state;
+                foreach (var product in specification.Products)
+                {
+                    if (product.VerifyState != VerifyState.Verified)
+                    {
+                        product.VerifyState = state;
+                    }
+                }
+            }
+            return _specificationRepository.AddOrUpdateRange(specifications);
+        }
+
         public async Task AddOrUpdateSpecifications(IEnumerable<UpdateSpecificationApiModel> specifications)
         {
             foreach (var specification in specifications)
@@ -108,6 +128,45 @@ namespace ProdmasterProvidersService.Services
             {
                 return false;
             }
+        }
+
+        public async Task<bool> ConfirmSendingSpecifications(IEnumerable<ConfirmSpecificationApiModel> specifications)
+        {
+            foreach (var specification in specifications)
+            {
+                if (!specification.IsVerified) { continue; }
+                var specificationToUpdate = await _specificationRepository.First(s => s.Id == specification.Id);
+                if (specificationToUpdate != null)
+                {
+                    var user = await _userRepository.First(u => u.Id == specificationToUpdate.UserId);
+                    if (user != null)
+                    {
+                        if(user.DisanId == default && specification.CustomId != default)
+                        {
+                            user.DisanId = specification.CustomId;
+                            await _userRepository.Update(user);
+                        }
+                    }
+                    specificationToUpdate.DisanId = specification.DisanId;
+                    specificationToUpdate.VerifyState = VerifyState.Verified;
+                    await _specificationRepository.Update(specificationToUpdate);
+                    if (specification.Products != null)
+                    {
+                        foreach (var product in specification.Products)
+                        {
+                            if (!product.IsVerified) { continue; }
+                            var productToUpdate = await _productRepository.First(p => p.Id == product.Id);
+                            if (productToUpdate != null)
+                            {
+                                productToUpdate.DisanId = product.DisanId;
+                                productToUpdate.VerifyState = VerifyState.Verified;
+                                await _productRepository.Update(productToUpdate);
+                            }
+                        }
+                    }
+                }
+            }
+            return true;
         }
     }
 }
