@@ -38,7 +38,7 @@ namespace ProdmasterProvidersService.Database
                 j =>
                 {
                     j.HasKey(t => new { t.ProductId, t.SpecificationId });
-                    j.ToTable("ProductSpecifications");
+                    j.ToTable($"{nameof(ProductSpecification)}s");
                 });
 
             modelBuilder
@@ -63,9 +63,15 @@ namespace ProdmasterProvidersService.Database
                     j =>
                     {
                         j.HasKey(t => new { t.ProductId, t.OrderId });
-                        j.ToTable("ProductSpecifications");
+                        j.ToTable(nameof(OrderProductPart));
                     }
                 );
+
+            modelBuilder.Entity<User>()
+                .HasMany(e => e.Orders)
+                .WithOne(e => e.User)
+                .HasForeignKey(e => e.Object)
+                .HasPrincipalKey (e => e.DisanId);
         }
 
         public override Task<int> SaveChangesAsync(CancellationToken cancellationToken = new CancellationToken())

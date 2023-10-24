@@ -1,0 +1,41 @@
+﻿@model ProvidersDomain.ViewModels.Order.OrderIndexModel
+@for (int i = 0; i < Model.Orders.Count; i++)
+{
+    var orderClass = "";
+    var orderState = "";
+    var orderHref = $"/order/ViewOrder?id={Model.Orders[i].Id}";
+    switch (Model.Orders[i].OrderState)
+    {
+        case ProvidersDomain.Models.OrderState.New:
+            orderClass = "bg-white";
+            orderState = "Новый";
+            break;
+        case ProvidersDomain.Models.OrderState.ConfirmedByProvider:
+            orderClass = "bg-success";
+            orderState = "Подтвержден";
+            break;
+        case ProvidersDomain.Models.OrderState.DeclinedByProvider:
+            orderClass = "bg-danger";
+            orderState = "Отклонен";
+            break;
+        case ProvidersDomain.Models.OrderState.ApprovedConfirmationByProvider:
+            orderClass = "bg-success";
+            orderState = "Подтвержден";
+            break;
+        case ProvidersDomain.Models.OrderState.ApprovedDeclineByProvider:
+            orderClass = "bg-danger";
+            orderState = "Отклонен";
+            break;
+        case ProvidersDomain.Models.OrderState.DeclinedByRecipient:
+            orderClass = "bg-danger";
+            orderState = "Отклонен";
+            break;
+    }
+    <tr class="clickable-row bg-gradient bg-opacity-25 @orderClass" data-href="@orderHref">
+        <td>@(i + 1)</td>
+        <td>@Model.Orders[i].Date.ToLocalTime().ToString("d")</td>
+        <td>@Model.Orders[i].CreatedAt.ToLocalTime()</td>
+        <td>@Model.Orders[i].Products.Count</td>
+        <td>@orderState</td>
+    </tr>
+}

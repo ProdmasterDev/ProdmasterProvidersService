@@ -30,6 +30,9 @@
                             <a class="nav-link text-light" asp-area="" asp-controller="Specification" asp-action="Index">Спецификации</a>
                         </li>
                         <li class="nav-item">
+                            <a class="nav-link text-light" asp-area="" asp-controller="Order" asp-action="Index">Заказы</a>
+                        </li>
+                        <li class="nav-item">
                             <a class="nav-link text-light" asp-area="" asp-controller="Account" asp-action="Index">Профиль</a>
                         </li>
                     </ul>
@@ -59,6 +62,7 @@
     <script for-controller="Home" src="~/js/home.js" asp-append-version="true"></script>
     <script for-controller="Catalog" src="~/js/products.js" asp-append-version="true"></script>
     <script for-controller="Specification" src="~/js/specifications.js" asp-append-version="true"></script>
+    <script for-controller="Order" src="~/js/orders.js" asp-append-version="true"></script>
     <script for-controller="Catalog" src="https://cdn.jsdelivr.net/npm/choices.js@9.0.1/public/assets/scripts/choices.min.js"></script>
     @await RenderSectionAsync("Scripts", required: false)
 </body>

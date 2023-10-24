@@ -22,6 +22,7 @@ var builder = WebApplication.CreateBuilder(args);
     builder.Services.AddScoped<IUserService, UserService>();
     builder.Services.AddScoped<ICatalogService, CatalogService>();
     builder.Services.AddScoped<ISpecificationService, SpecificationService>();
+    builder.Services.AddScoped<IOrderService, OrderService>();
     builder.Services.AddScoped<ISpecificationApiService, SpecificationApiService>();
     builder.Services.AddScoped<IUpdateProvidersService, UpdateProvidersService>();
     builder.Services.AddScoped<IHomeService, HomeService>();
@@ -38,6 +39,7 @@ var builder = WebApplication.CreateBuilder(args);
     builder.Services.AddScoped<CountryRepository>();
     builder.Services.AddScoped<ManufacturerRepository>();
     builder.Services.AddScoped<SpecificationRepository>();
+    builder.Services.AddScoped<OrderRepository>(); 
 }
 
 //Database

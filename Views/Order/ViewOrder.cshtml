@@ -1,0 +1,133 @@
+﻿@model ProvidersDomain.ViewModels.Order.OrderModel
+@{
+    ViewData["Title"] = $"Заказ на {Model.Date.ToLocalTime().ToString("d")}";
+    var orderState = "";
+    switch (Model.OrderState)
+    {
+        case ProvidersDomain.Models.OrderState.New:
+            orderState = "Новый";
+            break;
+        case ProvidersDomain.Models.OrderState.ConfirmedByProvider:
+            orderState = "Подтвержден";
+            break;
+        case ProvidersDomain.Models.OrderState.DeclinedByProvider:
+            orderState = "Отклонен";
+            break;
+        case ProvidersDomain.Models.OrderState.ApprovedConfirmationByProvider:
+            orderState = "Подтвержден";
+            break;
+        case ProvidersDomain.Models.OrderState.ApprovedDeclineByProvider:
+            orderState = "Отклонен";
+            break;
+        case ProvidersDomain.Models.OrderState.DeclinedByRecipient:
+            orderState = "Отклонен";
+            break;
+    }
+}
+
+<h2 class="mb-5">Заказ на @Model.Date.ToLocalTime().ToString("d")</h2>
+<form id="confirmOrDecline" asp-action="@Model.Action" asp-controller="Order" asp-anti-forgery="true">
+    <input type="hidden" asp-for="@Model.Id" />
+    <div class="mb-3">
+        <label class="fw-bold" asp-for="@Model.OrderState"></label><br>
+        <p class="ms-3">@orderState</p>
+        <input type="hidden" asp-for="@Model.OrderState" />
+    </div>
+    <div class="mb-3">
+        <label class="fw-bold" asp-for="@Model.Date"></label><br>
+        <p class="ms-3">@Model.Date.ToLocalTime().ToString("d")</p>
+        <input type="hidden" asp-for="@Model.Date" />
+    </div>
+    <div class="mb-3">
+        <label class="fw-bold" asp-for="@Model.UserName"></label><br>
+        <p class="ms-3">@Model.UserName</p>
+        <input type="hidden" asp-for="@Model.UserName" />
+    </div>
+
+    <table cellpadding="10" class="mb-3">
+        <thead class="text-center">
+            <tr>
+                <th>
+                    @Html.DisplayNameFor(model => model.Products.First().Name)
+                </th>
+                <th>
+                    @Html.DisplayNameFor(model => model.Products.First().Quantity)
+                </th>
+                <th>
+                    @Html.DisplayNameFor(model => model.Products.First().Price)
+                </th>
+                <th>
+                    <label class="fw-bold">Стоимость</label>
+                </th>
+            </tr>
+        </thead>
+        <tbody>
+            @for (var i = 0; i < Model.Products.Count; i++)
+            {
+                <tr>
+                    <td class="text-start">
+                        <a asp-controller="Catalog" asp-action="EditProduct" asp-route-id="@Model.Products[i].Id" class="text-decoration-none text-like-navbar-background">@Model.Products[i].Name.ToLower()</a>
+                    </td>
+                    <td class="text-center">
+                        @(Model.Products[i].Quantity?.ToString("#,##0.00") ?? "0.00")
+                    </td>
+                    <td class="text-center">
+                        @(Model.Products[i].Price?.ToString("#,##0.00") ?? "0.00")
+                    </td>
+                    <td class="text-center">
+                        @((Model.Products[i].Price * Model.Products[i].Quantity)?.ToString("#,##0.00") ?? "0.00")
+                    </td>
+                </tr>
+            }
+        </tbody>
+    </table>
+    <div class="mb-3">
+        <label class="fw-bold" asp-for="@Model.CreatedAt"></label><br>
+        <p class="ms-3">@Model.CreatedAt.ToLocalTime()</p>
+        <input type="hidden" asp-for="@Model.CreatedAt" />
+    </div>
+    <div class="mb-3">
+        <label class="fw-bold" asp-for="@Model.LastModified"></label><br />
+        <p class="ms-3">@Model.LastModified.ToLocalTime()</p>
+        <input type="hidden" asp-for="@Model.LastModified" />
+    </div>
+    <input id="confirmInput" type="hidden" asp-for="@Model.UserResponse" />
+    @if(Model.OrderState == ProvidersDomain.Models.OrderState.New)
+    {
+        <div class="mb-3">
+            <label class="fw-bold" asp-for="@Model.UserResponse"></label><br />
+            <div class="form-check form-check-inline">
+                <input class="form-check-input" type="radio" name="inlineRadioOptions" id="confirmRadio" value="@ProvidersDomain.Models.OrderState.ConfirmedByProvider" onclick="ConfirmOrder()">
+                <label class="form-check-label" for="confirmRadio">Подтвердить</label>
+            </div>
+            <div class="form-check form-check-inline">
+                <input class="form-check-input" type="radio" name="inlineRadioOptions" id="declineRadio" value="@ProvidersDomain.Models.OrderState.DeclinedByProvider" onclick="DeclineOrder()">
+                <label class="form-check-label" for="declineRadio">Отказаться</label>
+            </div>
+        </div>
+
+        <div id="declineNoteBlock" class="mb-3 d-none">
+            <label class="fw-bold" asp-for="@Model.DeclineNote"></label><br>
+            <textarea class="form-control" rows="3" asp-for="@Model.DeclineNote"></textarea>
+            <span class="text-danger" asp-validation-for="@Model.DeclineNote"></span>
+        </div>
+        <input id="confirmOrDeclineBtn" type="submit" form="confirmOrDecline" value="Подтверждаю" class="btn btn-primary" />
+    }
+    else
+    {
+        @if (Model.OrderState == ProvidersDomain.Models.OrderState.DeclinedByProvider)
+        {
+            <div id="declineNoteBlock" class="mb-3">
+                <label class="fw-bold" asp-for="@Model.DeclineNote"></label><br>
+                <textarea class="form-control bg-gradient bg-opacity-25 bg-danger" rows="3" asp-for="@Model.DeclineNote" disabled></textarea>
+            </div>
+        }
+        else
+        {
+            <input type="hidden" asp-for="@Model.DeclineNote" />
+        }
+    }
+    <div class="mb-3 validation text-danger" asp-validation-summary="ModelOnly"></div>
+    <div id="cancel" class="btn btn-outline-secondary" onclick="history.back()">Назад</div>
+</form>
+

@@ -1,0 +1,23 @@
+﻿@model ProvidersDomain.ViewModels.Order.OrderIndexModel
+@{
+    ViewData["Title"] = "Заказы";
+}
+
+<h2 class="mb-5 display-4">Заказы</h2>
+
+<div class="row g-3" style="overflow-x:auto;">
+    <table cellpadding="3" cellspacing="0" class="position-relative">
+        <thead>
+            <tr>
+                <th>№</th>
+                <th>Дата поставки</th>
+                <th>Дата создания</th>
+                <th>Кол-во товаров</th>
+                <th>Статус</th>
+            </tr>
+        </thead>
+        <tbody>
+            @await Html.PartialAsync("_OrdersTable", Model)
+        </tbody>
+    </table>
+</div>

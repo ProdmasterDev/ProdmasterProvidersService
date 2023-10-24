@@ -106,7 +106,6 @@ namespace ProdmasterProvidersService.Controllers
                         return RedirectToAction(nameof(HomeController.Index), nameof(HomeController).Replace("Controller", ""));
                     }
                     ModelState.AddModelError("", "Пользователь с таким email или ИНН уже зарегистрирован!");
-
                 }
                 catch
                 {
