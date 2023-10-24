@@ -1,6 +1,6 @@
 ﻿@model ProvidersDomain.ViewModels.Specification.SpecificationModel
 @{
-    ViewData["Title"] = $"Спецификация от {Model.CreatedAt}";
+    ViewData["Title"] = $"Спецификация от {Model.CreatedAt.ToLocalTime()}";
 }
 
 <h2 class="mb-5">Спецификация от @Model.CreatedAt.ToLocalTime()</h2>

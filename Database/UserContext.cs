@@ -15,6 +15,7 @@ namespace ProdmasterProvidersService.Database
         public DbSet<Manufacturer> Manufacturers { get; set; }
         public DbSet<Country> Countries { get; set; }
         public DbSet<Specification> Specifications { get; set; }
+        public DbSet<Order> Orders { get; set; }
         public UserContext(DbContextOptions<UserContext> options) : base(options)
         {
         }
@@ -37,10 +38,40 @@ namespace ProdmasterProvidersService.Database
                 j =>
                 {
                     j.HasKey(t => new { t.ProductId, t.SpecificationId });
-                    j.ToTable("ProductSpecifications");
+                    j.ToTable($"{nameof(ProductSpecification)}s");
                 });
+
             modelBuilder
-                .Entity<Specification>().HasIndex(s => s.DisanId).IsUnique().HasName(nameof(Specification.DisanId));
+                .Entity<Specification>()
+                .HasIndex(s => s.DisanId)
+                .IsUnique()
+                .HasName(nameof(Specification.DisanId));
+
+            modelBuilder
+                .Entity<Order>()
+                .HasMany(s => s.Products)
+                .WithMany(p => p.Orders)
+                .UsingEntity<OrderProductPart>(
+                    j => j
+                    .HasOne(opp => opp.Product)
+                    .WithMany(p => p.OrderProductPart)
+                    .HasForeignKey(pt => pt.ProductId),
+                    j => j
+                    .HasOne(opp => opp.Order)
+                    .WithMany(o => o.OrderProductPart)
+                    .HasForeignKey(pt => pt.OrderId),
+                    j =>
+                    {
+                        j.HasKey(t => new { t.ProductId, t.OrderId });
+                        j.ToTable(nameof(OrderProductPart));
+                    }
+                );
+
+            modelBuilder.Entity<User>()
+                .HasMany(e => e.Orders)
+                .WithOne(e => e.User)
+                .HasForeignKey(e => e.Object)
+                .HasPrincipalKey (e => e.DisanId);
         }
 
         public override Task<int> SaveChangesAsync(CancellationToken cancellationToken = new CancellationToken())
