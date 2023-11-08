@@ -30,6 +30,10 @@
             orderClass = "bg-danger";
             orderState = "Отклонен";
             break;
+        case ProvidersDomain.Models.OrderState.EditedByProvider:
+            orderClass = "bg-warning";
+            orderState = "Изменен";
+            break;
     }
     <tr class="clickable-row bg-gradient bg-opacity-25 @orderClass" data-href="@orderHref">
         <td>@(i + 1)</td>

@@ -214,7 +214,8 @@ namespace ProdmasterProvidersService.Services
                 {
                     if(input.JournalId != 0 && input.JournalId != null)
                     {
-                        if(order.OrderState == OrderState.ConfirmedByProvider)
+                        if(order.OrderState == OrderState.ConfirmedByProvider
+                            || order.OrderState == OrderState.EditedByProvider)
                         {
                             order.JournalId = input.JournalId;
                             order.OrderState = OrderState.ApprovedConfirmationByProvider;
@@ -236,38 +237,88 @@ namespace ProdmasterProvidersService.Services
             var list = new List<OrderApiModel>();
             var orders = await _orderRepository
                 .Where(o => o.OrderState == OrderState.ConfirmedByProvider
-                    || o.OrderState == OrderState.DeclinedByProvider);
+                    || o.OrderState == OrderState.DeclinedByProvider
+                    || o.OrderState == OrderState.EditedByProvider);
             foreach (var order in orders)
             {
+                var productPart = new List<OrderProductApiModel>();
+                foreach(var pp in order.OrderProductPart) 
+                {
+                    var apiProduct = new OrderProductApiModel() { DisanId = pp.Product.DisanId, Price = pp.Price, Quantity = pp.Quantity };
+                    productPart.Add(apiProduct);
+                }
+
                 list.Add(new OrderApiModel()
                 {
                     JrId = order.JrId,
                     JournalId = order.JournalId,
                     Date = order.Date,
+                    OrderState = order.OrderState,
                     Object = order.Object,
                     DeclineNote = order.DeclineNote ?? string.Empty,
+                    ProductPart = productPart,
                 });
             }
             return list;
         }
         public async Task ConfirmOrder(OrderModel orderModel)
         {
-            var order = await _orderRepository.First(o => o.Id == orderModel.Id);
-            if (order != null)
-            {
-                order.OrderState = OrderState.ConfirmedByProvider;
-                await _orderRepository.Update(order);
-            }
+            await ManageOrder(orderModel, OrderState.ConfirmedByProvider);
         }
         public async Task DeclineOrder(OrderModel orderModel)
         {
-            var order = await _orderRepository.First(o => o.Id == orderModel.Id);
-            if(order != null)
+            await ManageOrder(orderModel, OrderState.DeclinedByProvider);
+        }
+
+        public async Task EditOrder(OrderModel orderModel)
+        {
+            await ManageOrder(orderModel, OrderState.EditedByProvider);
+        }
+
+        private async Task ManageOrder(OrderModel model, OrderState state)
+        {
+            if (state != OrderState.ConfirmedByProvider
+                && state != OrderState.DeclinedByProvider
+                && state != OrderState.EditedByProvider) return; 
+            var order = await _orderRepository.First(o => o.Id == model.Id);
+            if (order != null)
             {
-                order.OrderState = OrderState.DeclinedByProvider;
-                order.DeclineNote = orderModel.DeclineNote;
+                order.OrderState = state;
+                if(state!=OrderState.ConfirmedByProvider)
+                    order.DeclineNote = model.DeclineNote;
+
+                if(state == OrderState.EditedByProvider)
+                {
+                    foreach(var modelProduct in model.Products)
+                    {
+                        var productPart = order.OrderProductPart;
+                        var product = productPart.FirstOrDefault(p => p.ProductId == modelProduct.Id && p.OrderId == order.Id);
+                        if(product != null && modelProduct.Quantity != null)
+                        {
+                            product.Quantity = (double)modelProduct.Quantity;
+                        }
+                    }
+                }
+
+                //не меняется значение количества
+
                 await _orderRepository.Update(order);
             }
+        }
+
+        public async Task<OrderProductModel?> GetOriginalProductInOrder(OrderProductModel model, OrderModel order)
+        {
+            var originalOrder = await _orderRepository.First(o => o.Id == order.Id);
+            if(originalOrder != null)
+            {
+                var productPart = originalOrder.OrderProductPart;
+                var product = productPart.FirstOrDefault(p => p.ProductId == model.Id);
+                if (product != null)
+                {
+                    return new OrderProductModel() { Id = product.ProductId, Quantity = product.Quantity, Price = product.Price };
+                }
+            }
+            return null;
         }
 
         private async Task<string> GenerateToken(string salt)

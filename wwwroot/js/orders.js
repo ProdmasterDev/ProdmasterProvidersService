@@ -18,6 +18,7 @@ function ConfirmOrder() {
         $("#declineNoteBlock").addClass("d-none");
     $("#confirmInput").val(value);
     $("#confirmOrDeclineBtn").prop("value", "Подтверждаю");
+    RefreshProductTable(value);
 }
 
 function DeclineOrder() {
@@ -26,4 +27,39 @@ function DeclineOrder() {
         $("#declineNoteBlock").removeClass("d-none")
     $("#confirmInput").val(value);
     $("#confirmOrDeclineBtn").prop("value", "Отклоняю");
+    RefreshProductTable(value);
+}
+
+function EditOrder() {
+    var value = $("#editRadio").val();
+    if ($("#declineNoteBlock").hasClass("d-none"))
+        $("#declineNoteBlock").removeClass("d-none")
+    $("#confirmInput").val(value);
+    $("#confirmOrDeclineBtn").prop("value", "Изменяю");
+    RefreshProductTable(value);
+}
+
+function RefreshProductTable() {
+    var id = $("#entityId").val();
+    orderState = $("#confirmInput").val();
+    var data = {
+        id: id,
+        orderState: orderState
+    }
+    console.log(data);
+    var url = "/order/RefreshOrderProductPart";
+
+    $.ajax({
+        url: url,
+        data: data,
+        method: 'POST',
+        success: (html) => {
+            console.log(html)
+            $('table tbody').html(html);
+            $('table').removeClass("loading");
+        },
+        error: (msg) => {
+            console.log(msg)
+        }
+    });
 }
