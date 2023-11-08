@@ -96,11 +96,11 @@ void ConfigureUserContextConnection(DbContextOptionsBuilder options)
 var app = builder.Build();
 
 #if DEBUG
-app.UseSwagger()
-    .UseSwaggerUI(c =>
-    {
-        c.SwaggerEndpoint("/swagger/v1/swagger.json", "v1");
-    });
+    app.UseSwagger()
+        .UseSwaggerUI(c =>
+        {
+            c.SwaggerEndpoint("/swagger/v1/swagger.json", "v1");
+        });
 #endif
 
 // Configure the HTTP request pipeline.
@@ -118,6 +118,7 @@ using (var scope = app.Services.CreateScope())
 }
 
 app.UseHttpsRedirection();
+
 app.UseStaticFiles();
 
 app.UseRouting();

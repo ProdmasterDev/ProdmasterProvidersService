@@ -4,6 +4,7 @@ using Newtonsoft.Json;
 using ProdmasterProvidersService.Services;
 using ProvidersDomain.Models;
 using ProvidersDomain.Services;
+using ProvidersDomain.ViewModels.Account;
 using ProvidersDomain.ViewModels.Catalog;
 using ProvidersDomain.ViewModels.Order;
 using ProvidersDomain.ViewModels.Specification;
@@ -44,12 +45,10 @@ namespace ProdmasterProvidersService.Controllers
                 {
                     return RedirectToAction("ViewOrder", "Order", new { id = id.Value });
                 }
-                return View(new OrderIndexModel { Orders = user.Orders.OrderByDescending(c => c.Date).ToList() });
+                return View(new OrderIndexModel { Orders = user.Orders.OrderByDescending(o => o.Date).ThenByDescending(o => o.CreatedAt).ToList() });
             }
             return View(new OrderIndexModel { Orders = new List<Order>() });
         }
-
-        
 
         [HttpGet]
         [Route("ViewOrder")]
@@ -62,8 +61,6 @@ namespace ProdmasterProvidersService.Controllers
                 return BadRequest("Failed to get user");
             }
             var orderModel = await _orderService.GetOrderModel(user, id);
-            
-
             if(orderModel == null)
             {
                 return RedirectToAction("Index", "Order");
@@ -72,8 +69,31 @@ namespace ProdmasterProvidersService.Controllers
             {
                 orderModel.Action = nameof(ViewOrder);
                 return View(orderModel);
+            }   
+        }
+
+        [HttpPost]
+        [Route("RefreshOrderProductPart")]
+        public async Task<IActionResult> RefreshOrderProductPart(long id, OrderState orderState)
+        {
+            var user = await GetUser();
+            if (user == null)
+            {
+                _logger.LogWarning($"Failed to get user, userName: {User.Identity?.Name};");
+                return BadRequest("Failed to get user");
             }
-                
+
+            var orders = user.Orders;
+            if (orders != null && orders.Any() && orders.FirstOrDefault(o => o.Id == id) != null)
+            {
+                var model = await _orderService.GetOrderModel(user, id);
+                if(model != null)
+                {
+                    model.UserResponse = orderState;
+                    return PartialView("_ProductsTable", model);
+                }
+            }
+            return PartialView("_ProductsTable", new OrderModel());
         }
 
         [HttpPost]
@@ -156,6 +176,36 @@ namespace ProdmasterProvidersService.Controllers
                         ModelState.AddModelError(nameof(model.DeclineNote), "Не заполнена причина отказа!");
                         return View(nameof(ViewOrder), model);
                     }
+                }
+
+                if (model.UserResponse == OrderState.EditedByProvider)
+                {
+                    if (model.DeclineNote.Length <= 0)
+                    {
+                        ModelState.AddModelError(nameof(model.DeclineNote), "Не заполнена причина изменения заказа!");
+                        return View(nameof(ViewOrder), model);
+                    }
+
+                    foreach(var product in model.Products)
+                    {
+                        if (product.Quantity < 0)
+                        {
+                            ModelState.AddModelError(nameof(model.Products), "Количество товара не может быть меньше нуля");
+                            return View(nameof(ViewOrder), model);
+                        }
+
+                        var originalProduct = await _orderService.GetOriginalProductInOrder(product, model);
+
+                        if (originalProduct != null && product.Quantity > originalProduct.Quantity)
+                        {
+                            ModelState.AddModelError(nameof(model.Products), "Количество товара не может быть больше, чем изначальный заказ");
+                            return View(nameof(ViewOrder), model);
+                        }
+                    }
+
+                    await _orderService.EditOrder(model);
+                    var orderModel = await _orderService.GetOrderModel(user, model.Id);
+                    return View(nameof(ViewOrder), orderModel);
                 }
 
                 ModelState.AddModelError("", "Неизвестная ошибка! Заказ не подтвержден и не отклонен!");

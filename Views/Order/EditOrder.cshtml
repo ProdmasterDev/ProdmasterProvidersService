@@ -22,9 +22,6 @@
         case ProvidersDomain.Models.OrderState.DeclinedByRecipient:
             orderState = "Отклонен";
             break;
-        case ProvidersDomain.Models.OrderState.EditedByProvider:
-            orderState = "Изменен";
-            break;
     }
 }
 
@@ -79,7 +76,7 @@
         <input type="hidden" asp-for="@Model.LastModified" />
     </div>
     <input id="confirmInput" type="hidden" asp-for="@Model.UserResponse" />
-    @if (Model.OrderState == ProvidersDomain.Models.OrderState.New)
+    @if(Model.OrderState == ProvidersDomain.Models.OrderState.New)
     {
         <div class="mb-3">
             <label class="fw-bold" asp-for="@Model.UserResponse"></label><br />
