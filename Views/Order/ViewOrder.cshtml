@@ -106,7 +106,7 @@
     }
     else
     {
-        @if (Model.OrderState == ProvidersDomain.Models.OrderState.DeclinedByProvider)
+        @if (Model.OrderState == ProvidersDomain.Models.OrderState.DeclinedByProvider || Model.OrderState == ProvidersDomain.Models.OrderState.EditedByProvider)
         {
             <div id="declineNoteBlock" class="mb-3">
                 <label class="fw-bold" asp-for="@Model.DeclineNote"></label><br>
