@@ -321,6 +321,10 @@ namespace ProdmasterProvidersService.Services
             return null;
         }
 
+        public async Task<Order?> GetOrderById(long id)
+        {
+            return await _orderRepository.First(o => o.Id == id);
+        }
         private async Task<string> GenerateToken(string salt)
         {
             var exprires = DateTime.Now + TimeSpan.FromDays(1);

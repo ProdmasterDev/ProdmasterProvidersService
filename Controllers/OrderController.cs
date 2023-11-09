@@ -73,26 +73,26 @@ namespace ProdmasterProvidersService.Controllers
         }
 
         [HttpPost]
+        [AllowAnonymous]
         [Route("RefreshOrderProductPart")]
         public async Task<IActionResult> RefreshOrderProductPart(long id, OrderState orderState)
         {
-            var user = await GetUser();
-            if (user == null)
+            var order = await _orderService.GetOrderById(id);
+
+            if (order == null || order.User == null)
             {
-                _logger.LogWarning($"Failed to get user, userName: {User.Identity?.Name};");
-                return BadRequest("Failed to get user");
+                return PartialView("_ProductsTable", new OrderModel());
             }
 
-            var orders = user.Orders;
-            if (orders != null && orders.Any() && orders.FirstOrDefault(o => o.Id == id) != null)
+            var user = order.User;
+
+            var model = await _orderService.GetOrderModel(user, id);
+            if (model != null)
             {
-                var model = await _orderService.GetOrderModel(user, id);
-                if(model != null)
-                {
-                    model.UserResponse = orderState;
-                    return PartialView("_ProductsTable", model);
-                }
+                model.UserResponse = orderState;
+                return PartialView("_ProductsTable", model);
             }
+
             return PartialView("_ProductsTable", new OrderModel());
         }
 
