@@ -109,7 +109,9 @@
         @if (Model.OrderState == ProvidersDomain.Models.OrderState.DeclinedByProvider 
             || Model.OrderState == ProvidersDomain.Models.OrderState.EditedByProvider
             || Model.OrderState == ProvidersDomain.Models.OrderState.ApprovedDeclineByProvider
-            || (Model.OrderState == ProvidersDomain.Models.OrderState.ApprovedConfirmationByProvider && Model.DeclineNote!= null && !Model.DeclineNote.Equals(string.Empty)))
+            || (Model.OrderState == ProvidersDomain.Models.OrderState.ApprovedConfirmationByProvider 
+                && Model.DeclineNote!= null 
+                && !Model.DeclineNote.Equals(string.Empty)))
         {
             <div id="declineNoteBlock" class="mb-3">
                 <label class="fw-bold" asp-for="@Model.DeclineNote"></label><br>
