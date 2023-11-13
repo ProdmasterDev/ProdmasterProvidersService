@@ -7,13 +7,14 @@ namespace ProdmasterProvidersService.Extensions
     {
         public static WebApplication SetupMiddleware(this WebApplication app)
         {
-            #if DEBUG
-            app.UseSwagger()
+            if (app.Environment.IsDebug())
+            {
+                app.UseSwagger()
                 .UseSwaggerUI(c =>
                 {
                     c.SwaggerEndpoint("/swagger/v1/swagger.json", "v1");
                 });
-            #endif
+            }
 
             // Configure the HTTP request pipeline.
             if (!app.Environment.IsDevelopment())

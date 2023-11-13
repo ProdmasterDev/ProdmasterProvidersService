@@ -1,8 +1,6 @@
 ﻿using Microsoft.AspNetCore.Authentication.Cookies;
-using Microsoft.AspNetCore.Mvc;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.DependencyInjection.Extensions;
-using Microsoft.Extensions.DependencyInjection;
 using ProdmasterProvidersService.Database;
 using ProdmasterProvidersService.Repositories;
 using ProdmasterProvidersService.Services;
@@ -87,14 +85,14 @@ namespace ProdmasterProvidersService.Extensions
             void ConfigureUserContextConnection(DbContextOptionsBuilder options)
             {
                 String connectionStringTag = "UserContext";
-                #if DEBUG
-                connectionStringTag = "UserContextDev";
-                #endif
+                if (builder.Environment.IsDebug())
+                {
+                    connectionStringTag = "UserContextDev";
+                }
                 options.UseLazyLoadingProxies()
                     .UseNpgsql(builder.Configuration.GetConnectionString(connectionStringTag)).ConfigureWarnings(w => w.Ignore(CoreEventId.LazyLoadOnDisposedContextWarning))
                     .EnableSensitiveDataLogging();
             }
-
             return builder;
         }
     }
