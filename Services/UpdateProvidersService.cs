@@ -65,7 +65,7 @@ namespace ProdmasterProvidersService.Services
             }
         }
 
-        public async Task LoadProvider(User provider)
+        public async Task<User> LoadProvider(User provider)
         {
             var user = await _userRepository.First(x => x.DisanId == provider.DisanId)
                 ?? await _userRepository.First(x => x.INN == provider.INN)
@@ -83,6 +83,7 @@ namespace ProdmasterProvidersService.Services
             {
                 await UpdateSpecifications(specifications);
             }
+            return user;
         }
         public async Task LoadProvider(long customId, string? password)
         {
@@ -91,7 +92,6 @@ namespace ProdmasterProvidersService.Services
             if (provider != null)
             {
                 //var dbProvider = await _userRepository.First(x => x.DisanId == provider.DisanId) ?? await _userRepository.First(x => x.INN == provider.INN);
-
 
                 //if (dbProvider != null) throw new Exception("User exsists");
 

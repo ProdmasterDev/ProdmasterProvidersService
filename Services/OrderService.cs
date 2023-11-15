@@ -17,12 +17,14 @@ namespace ProdmasterProvidersService.Services
         private readonly ProductRepository _productRepository;
         private readonly UserRepository _userRepository;
         private readonly StandartRepository _standartRepository;
-        public OrderService(OrderRepository orderRepository, ProductRepository productRepository, UserRepository userRepository, StandartRepository standartRepository)
+        private readonly UpdateProvidersService _updateProvidersService;
+        public OrderService(OrderRepository orderRepository, ProductRepository productRepository, UserRepository userRepository, StandartRepository standartRepository, UpdateProvidersService updateProvidersService)
         {
             _orderRepository = orderRepository;
             _productRepository = productRepository;
             _userRepository = userRepository;
             _standartRepository = standartRepository;
+            _updateProvidersService = updateProvidersService;
         }
         public async Task<Order> CreateOrder(OrderApiModel order)
         {
@@ -73,7 +75,9 @@ namespace ProdmasterProvidersService.Services
 
                         if (user == null)
                         {
-                            order.Object = default;
+                            var newUser = new User();
+                            newUser.DisanId = order.Object;
+                            user = await _updateProvidersService.LoadProvider(newUser);
                         }
 
                         var newOrder = new Order()
