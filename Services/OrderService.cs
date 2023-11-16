@@ -17,8 +17,8 @@ namespace ProdmasterProvidersService.Services
         private readonly ProductRepository _productRepository;
         private readonly UserRepository _userRepository;
         private readonly StandartRepository _standartRepository;
-        private readonly UpdateProvidersService _updateProvidersService;
-        public OrderService(OrderRepository orderRepository, ProductRepository productRepository, UserRepository userRepository, StandartRepository standartRepository, UpdateProvidersService updateProvidersService)
+        private readonly IUpdateProvidersService _updateProvidersService;
+        public OrderService(OrderRepository orderRepository, ProductRepository productRepository, UserRepository userRepository, StandartRepository standartRepository, IUpdateProvidersService updateProvidersService)
         {
             _orderRepository = orderRepository;
             _productRepository = productRepository;
@@ -71,14 +71,7 @@ namespace ProdmasterProvidersService.Services
                             }
                         }
 
-                        var user = await _userRepository.First(u => u.DisanId == order.Object);
-
-                        if (user == null)
-                        {
-                            var newUser = new User();
-                            newUser.DisanId = order.Object;
-                            user = await _updateProvidersService.LoadProvider(newUser);
-                        }
+                        var user = await _updateProvidersService.LoadProvider(new User() { DisanId = order.Object });
 
                         var newOrder = new Order()
                         {
@@ -87,7 +80,7 @@ namespace ProdmasterProvidersService.Services
                             Object = order.Object,
                             Token = await GenerateToken((user != null) ? user.Name.Trim() : string.Empty),
                             Date = order.Date,
-                            User = user,
+                            User = user,  
                             OrderProductPart = orderProductPart,
                             OrderState = OrderState.New,
                             DeclineNote = ""
@@ -303,8 +296,6 @@ namespace ProdmasterProvidersService.Services
                         }
                     }
                 }
-
-                //не меняется значение количества
 
                 await _orderRepository.Update(order);
             }
