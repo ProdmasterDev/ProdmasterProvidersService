@@ -48,6 +48,7 @@ namespace ProdmasterProvidersService.Services
                                     ProductId = orderProduct.Id,
                                     Price = opp.Price,
                                     Quantity = opp.Quantity,
+                                    OriginalQuantity = opp.Quantity,
                                 });
                             }
                             else
@@ -65,7 +66,8 @@ namespace ProdmasterProvidersService.Services
                                         Product = orderProduct,
                                         ProductId = orderProduct.Id,
                                         Price = opp.Price,
-                                        Quantity = opp.Quantity
+                                        Quantity = opp.Quantity,
+                                        OriginalQuantity = opp.Quantity
                                     });
                                 }
                             }
@@ -83,7 +85,8 @@ namespace ProdmasterProvidersService.Services
                             User = user,  
                             OrderProductPart = orderProductPart,
                             OrderState = OrderState.New,
-                            DeclineNote = ""
+                            DeclineNote = "",
+                            DocNumber = order.GetCleanDocNumber(),
                         };
                         return await _orderRepository.Add(newOrder);
                     }
@@ -167,6 +170,7 @@ namespace ProdmasterProvidersService.Services
                     CreatedAt = order.CreatedAt.ToLocalTime(),
                     LastModified = order.LastModified.ToLocalTime(),
                     DeclineNote = order.DeclineNote ?? string.Empty,
+                    DocNumber = order.DocNumber ?? string.Empty,
                     Products = order.OrderProductPart.OrderBy(c => c.Product.Name)
                     .Select(c => new OrderProductModel
                     {
@@ -174,6 +178,7 @@ namespace ProdmasterProvidersService.Services
                         Price = c.Price,
                         Name = c.Product.Name,
                         Quantity = c.Quantity,
+                        OriginalQuantity = (c.OriginalQuantity != 0 && c.OriginalQuantity != null) ? c.OriginalQuantity : c.Quantity,
                     }).ToList(),
                 };
                 if (!model.Products.Any()) model.Products.Add(new OrderProductModel() { Id = default, Price = default });
