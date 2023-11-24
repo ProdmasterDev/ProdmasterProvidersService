@@ -17,8 +17,8 @@ namespace ProdmasterProvidersService.Services
         private readonly ProductRepository _productRepository;
         private readonly UserRepository _userRepository;
         private readonly StandartRepository _standartRepository;
-        private readonly UpdateProvidersService _updateProvidersService;
-        public OrderService(OrderRepository orderRepository, ProductRepository productRepository, UserRepository userRepository, StandartRepository standartRepository, UpdateProvidersService updateProvidersService)
+        private readonly IUpdateProvidersService _updateProvidersService;
+        public OrderService(OrderRepository orderRepository, ProductRepository productRepository, UserRepository userRepository, StandartRepository standartRepository, IUpdateProvidersService updateProvidersService)
         {
             _orderRepository = orderRepository;
             _productRepository = productRepository;
@@ -48,6 +48,7 @@ namespace ProdmasterProvidersService.Services
                                     ProductId = orderProduct.Id,
                                     Price = opp.Price,
                                     Quantity = opp.Quantity,
+                                    OriginalQuantity = opp.Quantity,
                                 });
                             }
                             else
@@ -65,20 +66,14 @@ namespace ProdmasterProvidersService.Services
                                         Product = orderProduct,
                                         ProductId = orderProduct.Id,
                                         Price = opp.Price,
-                                        Quantity = opp.Quantity
+                                        Quantity = opp.Quantity,
+                                        OriginalQuantity = opp.Quantity
                                     });
                                 }
                             }
                         }
 
-                        var user = await _userRepository.First(u => u.DisanId == order.Object);
-
-                        if (user == null)
-                        {
-                            var newUser = new User();
-                            newUser.DisanId = order.Object;
-                            user = await _updateProvidersService.LoadProvider(newUser);
-                        }
+                        var user = await _updateProvidersService.LoadProvider(new User() { DisanId = order.Object });
 
                         var newOrder = new Order()
                         {
@@ -87,10 +82,11 @@ namespace ProdmasterProvidersService.Services
                             Object = order.Object,
                             Token = await GenerateToken((user != null) ? user.Name.Trim() : string.Empty),
                             Date = order.Date,
-                            User = user,
+                            User = user,  
                             OrderProductPart = orderProductPart,
                             OrderState = OrderState.New,
-                            DeclineNote = ""
+                            DeclineNote = "",
+                            DocNumber = order.GetCleanDocNumber(),
                         };
                         return await _orderRepository.Add(newOrder);
                     }
@@ -174,6 +170,7 @@ namespace ProdmasterProvidersService.Services
                     CreatedAt = order.CreatedAt.ToLocalTime(),
                     LastModified = order.LastModified.ToLocalTime(),
                     DeclineNote = order.DeclineNote ?? string.Empty,
+                    DocNumber = order.DocNumber ?? string.Empty,
                     Products = order.OrderProductPart.OrderBy(c => c.Product.Name)
                     .Select(c => new OrderProductModel
                     {
@@ -181,6 +178,7 @@ namespace ProdmasterProvidersService.Services
                         Price = c.Price,
                         Name = c.Product.Name,
                         Quantity = c.Quantity,
+                        OriginalQuantity = (c.OriginalQuantity != 0 && c.OriginalQuantity != null) ? c.OriginalQuantity : c.Quantity,
                     }).ToList(),
                 };
                 if (!model.Products.Any()) model.Products.Add(new OrderProductModel() { Id = default, Price = default });
@@ -303,8 +301,6 @@ namespace ProdmasterProvidersService.Services
                         }
                     }
                 }
-
-                //не меняется значение количества
 
                 await _orderRepository.Update(order);
             }

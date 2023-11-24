@@ -32,6 +32,11 @@
 <form id="confirmOrDecline" asp-action="@Model.Action" asp-controller="Order" asp-anti-forgery="true">
     <input id="entityId" type="hidden" asp-for="@Model.Id" />
     <div class="mb-3">
+        <label class="fw-bold" asp-for="@Model.DocNumber"></label><br>
+        <p class="ms-3">@Model.DocNumber</p>
+        <input type="hidden" asp-for="@Model.DocNumber" />
+    </div>
+    <div class="mb-3">
         <label class="fw-bold" asp-for="@Model.OrderState"></label><br>
         <p class="ms-3">@orderState</p>
         <input type="hidden" asp-for="@Model.OrderState" />
@@ -52,6 +57,9 @@
             <tr>
                 <th>
                     @Html.DisplayNameFor(model => model.Products.First().Name)
+                </th>
+                <th>
+                    @Html.DisplayNameFor(model => model.Products.First().OriginalQuantity)
                 </th>
                 <th>
                     @Html.DisplayNameFor(model => model.Products.First().Quantity)

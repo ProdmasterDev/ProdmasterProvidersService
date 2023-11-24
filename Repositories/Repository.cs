@@ -115,7 +115,14 @@ namespace ProdmasterProvidersService.Repositories
                 await _dbContext.BulkInsertOrUpdateAsync(range, bulkConfig);
                 await _dbContext.BulkSaveChangesAsync();
             }
-            catch (DbUpdateException exception) {}
+            catch (DbUpdateException exception) 
+            {
+                Console.WriteLine(exception.Message);
+            }
+            catch (Exception exception)
+            {
+                Console.WriteLine(exception.Message);
+            }
         }
 
         public async Task<TModel[]> Where(Expression<Func<TModel, bool>> predicate)

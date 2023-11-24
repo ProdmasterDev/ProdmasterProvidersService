@@ -8,6 +8,9 @@
         </td>
         <input type="hidden" asp-for="@Model.Products[i].Id">
         <td class="text-center">
+            @(Model.Products[i].OriginalQuantity?.ToString("#,##0.00") ?? "0.00")
+        </td>
+        <td class="text-center">
             @if (Model.UserResponse == ProvidersDomain.Models.OrderState.EditedByProvider && Model.OrderState == ProvidersDomain.Models.OrderState.New)
             {
                 <input type=number step=any class="form-control" asp-for="@Model.Products[i].Quantity">

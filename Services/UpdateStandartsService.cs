@@ -4,6 +4,7 @@ using ProdmasterProvidersService.Migrations;
 using ProdmasterProvidersService.Repositories;
 using ProvidersDomain.Models;
 using ProvidersDomain.Services;
+using System.Linq;
 using System.Net.Http.Headers;
 using System.Text;
 
@@ -14,13 +15,15 @@ namespace ProdmasterProvidersService.Services
         private readonly HttpClient _httpClient;
         private readonly StandartRepository _standartRepository;
         private readonly ProductRepository _productRepository;
+        private readonly OrderRepository _orderRepository;
         private const string url = "http://192.168.1.251:8444/api";
 
-        public UpdateStandartsService(HttpClient httpClient, StandartRepository standartRepository, ProductRepository productRepository)
+        public UpdateStandartsService(HttpClient httpClient, StandartRepository standartRepository, ProductRepository productRepository, OrderRepository orderRepository)
         {
             _httpClient = httpClient;
             _standartRepository = standartRepository;
             _productRepository = productRepository;
+            _orderRepository = orderRepository;
         }
         public async Task Update()
         {
@@ -52,6 +55,12 @@ namespace ProdmasterProvidersService.Services
             if (products != null)
             {
                 await UpdateProducts(products);
+            }
+
+            var orders = await GetOrders();
+            if (orders != null)
+            {
+                await UpdateOrders(orders);
             }
         }
 
@@ -147,12 +156,15 @@ namespace ProdmasterProvidersService.Services
 
         private async Task UpdateProducts(IEnumerable<Product> products)
         {
+            var productsFiltered= (await _productRepository.Where(p => p.DisanId != null)).ToList();
+            productsFiltered = productsFiltered.Where(p => products.Any(x => x.DisanId == p.DisanId)).ToList();
+            products = products.Where(p => productsFiltered.Any(pis => pis.DisanId == p.DisanId));
             if (products.Any())
             {
                 var productsToUpdate = new List<Product>();
                 foreach (var product in products)
                 {
-                    var item = await _productRepository.First(p => p.DisanId == product.DisanId);
+                    var item = productsFiltered.First(p => p.DisanId == product.DisanId);
                     if (item != null)
                     {
                         item.ManufacturerId = product.ManufacturerId;
@@ -161,13 +173,52 @@ namespace ProdmasterProvidersService.Services
                         item.VendorCode = product.VendorCode ?? item.VendorCode;
                         item.Quantity = (product.Quantity != default) ? product.Quantity : item.Quantity;
                         item.CountryId = (product.CountryId == null || product.CountryId == 0) ? item.CountryId : product.CountryId;
-                        productsToUpdate.Add(item);
+                        if (productsToUpdate.FirstOrDefault(p => p.Id == item.Id) != null) { productsToUpdate.Add(item); }
                     }
                 }
                 await _productRepository.AddOrUpdateRange(productsToUpdate);
             }
         }
+        private async Task UpdateOrders(IEnumerable<Order> orders)
+        {
+            if (orders.Any())
+            {
+                var ordersToUpdate = new List<Order>();
+                foreach (var order in orders)
+                {
+                    var items = await _orderRepository.Where(p => p.JrId == order.JrId);
+                    foreach(var item in items)
+                    {
+                        if (item != null)
+                        {
+                            var docNumberClean = order.GetCleanDocNumber();
+                            if (docNumberClean != string.Empty && docNumberClean != item.DocNumber)
+                                item.DocNumber = docNumberClean;
+                            foreach (var product in item.OrderProductPart)
+                            {
+                                if(product.OriginalQuantity == null || product.OriginalQuantity == 0)
+                                {
+                                    product.OriginalQuantity = product.Quantity;
+                                }
+                            }
+                            ordersToUpdate.Add(item);
+                        }
+                    }
+                }
+                await _orderRepository.AddOrUpdateRange(ordersToUpdate);
+            }
+        }
 
+        public string GetNumber(string docnumber)
+        {
+            var searchWord = "закупка";
+            if (docnumber.Contains("закупка".ToUpper()))
+            {
+                var position = searchWord.Length + 2;
+                return docnumber.Substring(position).Trim();
+            }
+            return string.Empty;
+        }
         private Task<IEnumerable<Standart>?> GetStandarts()
         {
             var query = "\"select stands.number, stands.stock, stands.taste, stands.smell, stands.color, stands.structure, stands.consistenc, iif(not(isnull(saname.cvalue) or empty(saname.cvalue)), saname.cvalue, iif(not(empty(stands.nameprod)),stands.nameprod,stock.name)) as nameprod, stands.create, stands.modify, stock.unit as unitId, unit.short as unitShort, unit.name as unitName, sagroup.cvalue as categoryname " +
@@ -202,6 +253,14 @@ namespace ProdmasterProvidersService.Services
                "inner join stock as stock on st1.stock == stock.number " +
                $"where not st1.arch and st2.custom == 751601\"";
             return GetObjectsFromQueryAsync<IEnumerable<Product>>(query);
+        }
+        private Task<IEnumerable<Order>?> GetOrders()
+        {
+            var query = "\"select jr.number as jridn, jrf.jmain as journalid, jr.object, jr.doc_number as docnumber, '' as token, jr.date " +
+               "from jr " +
+               "left join jrf on jr.number == jrf.number " +
+               $"where jr.opera == 2 and 'ЗАКУПКА'$jr.Doc_number and not arch\"";
+            return GetObjectsFromQueryAsync<IEnumerable<Order>>(query);
         }
     }
 }

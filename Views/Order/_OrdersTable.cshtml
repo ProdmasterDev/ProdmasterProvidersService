@@ -37,6 +37,7 @@
     }
     <tr class="clickable-row bg-gradient bg-opacity-25 @orderClass" data-href="@orderHref">
         <td>@(i + 1)</td>
+        <td>@Model.Orders[i].DocNumber</td>
         <td>@Model.Orders[i].Date.ToLocalTime().ToString("d")</td>
         <td>@Model.Orders[i].CreatedAt.ToLocalTime()</td>
         <td>@Model.Orders[i].Products.Count</td>
