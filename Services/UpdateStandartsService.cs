@@ -256,7 +256,7 @@ namespace ProdmasterProvidersService.Services
         }
         private Task<IEnumerable<Order>?> GetOrders()
         {
-            var query = "\"select jr.number as jridn, jrf.jmain as journalid, jr.object, jr.doc_number as docnumber, '' as token, jr.date " +
+            var query = "\"select jr.number as jrid, jrf.jmain as journalid, jr.object, jr.doc_number as docnumber, '' as token, jr.date " +
                "from jr " +
                "left join jrf on jr.number == jrf.number " +
                $"where jr.opera == 2 and 'ЗАКУПКА'$jr.Doc_number and not arch\"";
