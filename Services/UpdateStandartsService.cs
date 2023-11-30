@@ -187,21 +187,45 @@ namespace ProdmasterProvidersService.Services
                 foreach (var order in orders)
                 {
                     var items = await _orderRepository.Where(p => p.JrId == order.JrId);
-                    foreach(var item in items)
+                    if (!items.Any() || order.JrId == 0)
                     {
-                        if (item != null)
+                        items = await _orderRepository.Where(p => p.DocNumber == order.GetCleanDocNumber());
+                        if (items.Any())
                         {
-                            var docNumberClean = order.GetCleanDocNumber();
-                            if (docNumberClean != string.Empty && docNumberClean != item.DocNumber)
-                                item.DocNumber = docNumberClean;
-                            foreach (var product in item.OrderProductPart)
+                            foreach (var item in items)
                             {
-                                if(product.OriginalQuantity == null || product.OriginalQuantity == 0)
+                                item.JrId = order.JrId;
+                                foreach (var product in item.OrderProductPart)
                                 {
-                                    product.OriginalQuantity = product.Quantity;
+                                    if (product.OriginalQuantity == null || product.OriginalQuantity == 0)
+                                    {
+                                        product.OriginalQuantity = product.Quantity;
+                                    }
                                 }
+                                if (ordersToUpdate.FirstOrDefault(p => p.Id == item.Id) == null)
+                                    ordersToUpdate.Add(item);
                             }
-                            ordersToUpdate.Add(item);
+                        }
+                    }
+                    else
+                    {
+                        foreach (var item in items)
+                        {
+                            if (item != null)
+                            {
+                                var docNumberClean = order.GetCleanDocNumber();
+                                if (docNumberClean != string.Empty && docNumberClean != item.DocNumber)
+                                    item.DocNumber = docNumberClean;
+                                foreach (var product in item.OrderProductPart)
+                                {
+                                    if (product.OriginalQuantity == null || product.OriginalQuantity == 0)
+                                    {
+                                        product.OriginalQuantity = product.Quantity;
+                                    }
+                                }
+                                if (ordersToUpdate.FirstOrDefault(p => p.Id == item.Id) == null)
+                                    ordersToUpdate.Add(item);
+                            }
                         }
                     }
                 }
